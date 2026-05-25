@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Artisan provider dashboard — manage profile and select your trade specialization." />
+    <title>Provider Dashboard | Artisan</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a href="index.html" class="logo" aria-label="Artisan home">
+          <span class="logo__mark" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          Artisan
+        </a>
+        <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <nav class="nav" data-nav-panel aria-label="Main">
+          <a href="index.html" class="nav__link">Home</a>
+          <a href="provider-dashboard.html" class="nav__link" data-nav>Dashboard</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="dashboard-page">
+        <div class="container dashboard-layout">
+          <div class="provider-sidebar-col">
+            <aside class="dashboard-card dashboard-sidebar">
+              <h2 class="dashboard-sidebar__title">Provider Panel</h2>
+              <nav class="dashboard-sidebar__nav" aria-label="Provider dashboard">
+                <a href="provider-dashboard.html" class="dashboard-link dashboard-link--active">Overview</a>
+                <a href="provider-requests.html" class="dashboard-link">My Requests</a>
+                <a href="provider-requests.html#booking-history" class="dashboard-link">History</a>
+                <a href="chat-thread.html" class="dashboard-link">My Chats</a>
+                <a href="provider-profile-settings.html" class="dashboard-link">Profile Settings</a>
+                <a href="login.html?logout=1" class="dashboard-link">Logout</a>
+              </nav>
+            </aside>
+
+            <div class="dashboard-card availability-card">
+              <h3 class="availability-card__title">Available</h3>
+              <p class="availability-card__hint">When off, you are unavailable — customers cannot find your profile when browsing providers.</p>
+              <button
+                type="button"
+                id="provider-availability-toggle"
+                class="availability-switch"
+                role="switch"
+                aria-checked="true"
+                aria-label="Toggle availability for customers"
+              >
+                <span class="availability-switch__track" aria-hidden="true">
+                  <span class="availability-switch__thumb"></span>
+                </span>
+                <span class="availability-switch__text">On</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="dashboard-shell">
+            <article class="dashboard-card provider-header">
+              <div class="provider-header__avatar-wrap">
+                <img
+                  id="provider-avatar-preview"
+                  class="provider-avatar"
+                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=80"
+                  alt="Provider profile photo"
+                />
+              </div>
+              <div class="provider-header__main">
+                <h1 id="provider-display-name">Ahmad Yaseen</h1>
+                <p class="provider-header__meta">
+                  Specialization:
+                  <span id="provider-trade-badge" class="provider-trade-badge is-empty">Trade not selected</span>
+                </p>
+                <p id="provider-bio-preview" class="provider-bio-preview is-empty">
+                  Add a short professional bio so customers can quickly trust your expertise.
+                </p>
+                <p id="provider-price-preview" class="provider-price-preview is-empty" aria-live="polite"></p>
+                <p id="provider-experience-preview" class="provider-experience-preview is-empty" aria-live="polite"></p>
+              </div>
+              <div class="provider-header__rate" aria-labelledby="your-rate-label">
+                <div id="your-rate-label" class="provider-rate__title">Your rate</div>
+                <div id="provider-rate-stars" class="star-row star-row--readonly"></div>
+                <p id="provider-rate-summary" class="provider-rate__summary">No ratings yet</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__grid">
+          <div>
+            <a href="index.html" class="logo" style="color: #f1f5f9; margin-bottom: 0.75rem">
+              <span class="logo__mark" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+              Artisan
+            </a>
+            <p style="margin: 0; font-size: 0.9375rem; max-width: 28ch">
+              A web platform for organizing service supply and demand — connecting skilled trades with people who need them.
+            </p>
+          </div>
+          <div>
+            <h3>Explore</h3>
+            <ul>
+              <li><a href="index.html">Home</a></li>
+              <li><a href="provider-dashboard.html">Provider dashboard</a></li>
+              <li><a href="login.html">Log in</a></li>
+              <li><a href="role-selection.html">Create account</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Product</h3>
+            <ul>
+              <li><a href="index.html#features">Features</a></li>
+              <li><a href="index.html#providers">Find providers</a></li>
+              <li><a href="role-selection.html">Choose role</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="site-footer__bottom">© <span id="year"></span> Artisan. Academic project — J.U.S.T. Computer Science.</div>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+    <script src="js/api-config.js"></script>
+    <script src="js/artisan-api.js"></script>
+    <script src="js/app.js" defer></script>
+  </body>
+</html>

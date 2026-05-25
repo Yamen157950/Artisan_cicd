@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Artisan administration — users and access control." />
+    <title>Administration | Artisan</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a href="index.html" class="logo" aria-label="Artisan home">
+          <span class="logo__mark" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M12 2l8 4v6c0 5-3.5 9.74-8 11-4.5-1.26-8-6-8-11V6l8-4z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          Artisan
+        </a>
+        <nav class="main-nav main-nav--premium main-nav--premium--no-left-links" aria-label="Main navigation">
+          <div class="main-nav__center" id="main-nav-center" aria-hidden="true"></div>
+          <div class="main-nav__toolbar main-nav__actions" id="main-nav-auth">
+            <a href="login.html" class="main-nav__btn main-nav__btn--ghost">Log in</a>
+            <a href="role-selection.html" class="main-nav__btn main-nav__btn--primary">Sign up</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main id="admin-dashboard-root" class="admin-dashboard">
+      <div class="admin-dashboard__bg" aria-hidden="true"></div>
+      <div class="container admin-dashboard__inner">
+        <header class="admin-dashboard__hero">
+          <p class="admin-dashboard__eyebrow">Operations</p>
+          <h1 class="admin-dashboard__title">Administration</h1>
+          <p class="admin-dashboard__lead">
+            Manage platform roles and user access. Only administrators can use this workspace.
+          </p>
+        </header>
+
+        <section class="admin-dashboard__panel" aria-labelledby="admin-users-heading">
+          <div class="admin-dashboard__panel-head">
+            <h2 id="admin-users-heading" class="admin-dashboard__panel-title">Users &amp; roles</h2>
+            <div class="admin-dashboard__search">
+              <input
+                type="search"
+                id="admin-user-search"
+                class="admin-dashboard__search-input"
+                placeholder="Search by email…"
+                autocomplete="off"
+              />
+              <button type="button" id="admin-user-search-btn" class="admin-btn admin-btn--primary">Search</button>
+            </div>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table" aria-describedby="admin-users-heading">
+              <thead>
+                <tr>
+                  <th scope="col">Email</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Roles</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-tbody"></tbody>
+            </table>
+          </div>
+
+          <footer class="admin-dashboard__pager">
+            <button type="button" id="admin-page-prev" class="admin-btn admin-btn--secondary">Previous</button>
+            <span id="admin-page-label" class="admin-dashboard__page-label">Page 1</span>
+            <button type="button" id="admin-page-next" class="admin-btn admin-btn--secondary">Next</button>
+          </footer>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__bottom">© <span id="year"></span> Artisan.</div>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+    <script src="js/api-config.js"></script>
+    <script src="js/artisan-api.js"></script>
+    <script src="js/app.js" defer></script>
+  </body>
+</html>

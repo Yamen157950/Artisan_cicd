@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Choose a date for your Artisan service booking — calendar from 2026." />
+    <title>Book a service | Artisan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --navy: #0a192f;
+        --royal: #1a237e;
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #dbe3f0;
+        --green: #16a34a;
+        --green-soft: #dcfce7;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, sans-serif;
+        color: var(--text);
+        background: linear-gradient(180deg, #eef2ff 0%, #f3f6fb 32%, #f3f6fb 100%);
+        min-height: 100vh;
+      }
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: linear-gradient(120deg, var(--navy), var(--royal));
+        color: #fff;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      }
+      .topbar__inner {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+      }
+      .brand {
+        color: #fff;
+        text-decoration: none;
+        font-size: 1.35rem;
+        font-weight: 800;
+      }
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .icon-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.14);
+        text-decoration: none;
+      }
+      .icon-btn:hover {
+        background: rgba(255, 255, 255, 0.24);
+      }
+      .page {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 1.25rem 1rem 3rem;
+      }
+      .back-link {
+        display: inline-block;
+        margin-bottom: 1.25rem;
+        color: var(--royal);
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 0.95rem;
+      }
+      .back-link:hover {
+        text-decoration: underline;
+      }
+      .page-eyebrow {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #4338ca;
+        margin: 0 0 0.35rem;
+      }
+      .page-title {
+        margin: 0 0 0.5rem;
+        font-size: 1.65rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+      .page-lead {
+        margin: 0 0 1.5rem;
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+      .provider-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.45rem 0.85rem;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 1.25rem;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+      }
+      .booking-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+      }
+      .booking-card h2 {
+        margin: 0 0 0.25rem;
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+      .booking-card .sub {
+        font-size: 0.875rem;
+        color: var(--muted);
+        margin: 0 0 1rem;
+      }
+      .cal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+      }
+      .cal-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+      .cal-nav {
+        display: flex;
+        gap: 0.35rem;
+      }
+      .cal-nav button {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #f8fafc;
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+        color: var(--text);
+      }
+      .cal-nav button:hover:not(:disabled) {
+        background: #eef2ff;
+        border-color: #c7d2fe;
+      }
+      .cal-nav button:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .cal-weekdays {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+        margin-bottom: 6px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--muted);
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+      }
+      .cal-day {
+        aspect-ratio: 1;
+        min-height: 38px;
+        border: none;
+        border-radius: 10px;
+        background: #f8fafc;
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text);
+        cursor: pointer;
+        padding: 0;
+      }
+      .cal-day:hover:not(:disabled):not(.cal-day--muted) {
+        background: #eef2ff;
+      }
+      .cal-day--muted {
+        visibility: hidden;
+        pointer-events: none;
+      }
+      .cal-day--disabled {
+        opacity: 0.28;
+        cursor: not-allowed;
+        color: var(--muted);
+      }
+      .cal-day--past {
+        opacity: 0.32;
+        cursor: not-allowed;
+        color: var(--muted);
+        text-decoration: line-through;
+        text-decoration-color: rgba(100, 116, 139, 0.45);
+      }
+      .cal-day--past:hover {
+        background: #fef2f2;
+      }
+      .date-alert {
+        display: none;
+        margin-top: 0.65rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 10px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+        font-size: 0.85rem;
+        font-weight: 600;
+        line-height: 1.4;
+      }
+      .date-alert.is-visible {
+        display: block;
+      }
+      .cal-day--selected {
+        background: var(--green) !important;
+        color: #fff !important;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+      }
+      .cal-day--today:not(.cal-day--selected) {
+        outline: 2px solid rgba(22, 163, 74, 0.45);
+        outline-offset: 1px;
+      }
+      .selected-pill {
+        margin-top: 1rem;
+        padding: 0.65rem 0.85rem;
+        background: var(--green-soft);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #166534;
+      }
+      .field {
+        margin-top: 1.25rem;
+      }
+      .field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 0.4rem;
+      }
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.65rem 0.75rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        font-family: inherit;
+        font-size: 0.95rem;
+      }
+      textarea {
+        min-height: 88px;
+        resize: vertical;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 0.5rem 1.35rem;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        width: 100%;
+        margin-top: 1.25rem;
+      }
+      .btn--primary {
+        background: var(--green);
+        color: #fff;
+      }
+      .btn--primary:hover:not(:disabled) {
+        filter: brightness(1.06);
+      }
+      .btn--primary:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .btn--ghost {
+        background: #f1f5f9;
+        color: var(--text);
+        width: auto;
+      }
+      .status {
+        margin-top: 0.85rem;
+        font-size: 0.9rem;
+        min-height: 1.25em;
+      }
+      .status--ok {
+        color: #15803d;
+      }
+      .status--err {
+        color: #b91c1c;
+      }
+      .login-gate {
+        text-align: center;
+        padding: 1rem 0;
+      }
+      .login-gate p {
+        color: var(--muted);
+        margin: 0 0 1rem;
+      }
+      .error-box {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+      }
+      .success-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+        background: rgba(10, 25, 47, 0.52);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.35s ease, visibility 0.35s ease;
+      }
+      .success-overlay.is-visible {
+        opacity: 1;
+        visibility: visible;
+      }
+      .success-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #fff;
+        border-radius: 24px;
+        padding: 2.25rem 2rem 2rem;
+        text-align: center;
+        box-shadow:
+          0 24px 64px rgba(15, 23, 42, 0.18),
+          0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+        transform: scale(0.92) translateY(12px);
+        opacity: 0;
+        transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+      }
+      .success-overlay.is-visible .success-modal {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+      .success-modal__icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 1.35rem;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #22c55e 0%, #16a34a 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 12px 28px rgba(22, 163, 74, 0.35);
+      }
+      .success-modal__icon svg {
+        width: 36px;
+        height: 36px;
+        stroke: #fff;
+        stroke-width: 2.5;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .success-modal__check {
+        stroke-dasharray: 48;
+        stroke-dashoffset: 48;
+        animation: successCheck 0.55s ease 0.2s forwards;
+      }
+      @keyframes successCheck {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      .success-modal__eyebrow {
+        margin: 0 0 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #16a34a;
+      }
+      .success-modal__title {
+        margin: 0 0 0.65rem;
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.3;
+        color: var(--text);
+      }
+      .success-modal__text {
+        margin: 0 0 1.5rem;
+        font-size: 1rem;
+        line-height: 1.55;
+        color: var(--muted);
+      }
+      .success-modal__progress {
+        height: 4px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        overflow: hidden;
+      }
+      .success-modal__progress-bar {
+        height: 100%;
+        width: 0;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #22c55e, #16a34a);
+      }
+      .success-overlay.is-visible .success-modal__progress-bar {
+        animation: successProgress 3s linear forwards;
+      }
+      @keyframes successProgress {
+        to {
+          width: 100%;
+        }
+      }
+      .success-modal__hint {
+        margin: 0.75rem 0 0;
+        font-size: 0.8rem;
+        color: #94a3b8;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__inner">
+        <a href="index.html" class="brand">Artisan</a>
+        <div class="top-actions">
+          <a class="icon-btn" href="index.html" title="Home" aria-label="Home">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+          </a>
+          <a class="icon-btn" href="customer-account.html" title="My Account" aria-label="My Account">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <a class="back-link" id="back-to-profile" href="customer-services.html">← Back</a>
+
+      <p class="page-eyebrow">Scheduling</p>
+      <h1 class="page-title">Book this service</h1>
+      <p class="page-lead">Pick a preferred date on the calendar. You can only book <strong>today or a future date</strong>.</p>
+
+      <div id="gate-error" class="error-box" style="display: none"></div>
+
+      <div id="main-flow" style="display: none">
+        <div class="provider-chip" id="provider-label">Provider</div>
+
+        <div class="booking-card">
+          <h2>Select a date</h2>
+          <p class="sub">Use the arrows to change month. Past dates cannot be selected.</p>
+
+          <div class="cal-header">
+            <h3 id="cal-month-label">—</h3>
+            <div class="cal-nav">
+              <button type="button" id="cal-prev" aria-label="Previous month">‹</button>
+              <button type="button" id="cal-next" aria-label="Next month">›</button>
+            </div>
+          </div>
+          <div class="cal-weekdays">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+          </div>
+          <div class="cal-grid" id="cal-grid" aria-hidden="true"></div>
+          <p class="date-alert" id="date-alert" role="alert" aria-live="assertive"></p>
+
+          <div class="selected-pill" id="selected-pill" style="display: none"></div>
+
+          <div class="field">
+            <label for="time-slot">Preferred time (optional)</label>
+            <select id="time-slot">
+              <option value="">— No preference —</option>
+              <option value="08:00">08:00</option>
+              <option value="09:00">09:00</option>
+              <option value="10:00">10:00</option>
+              <option value="11:00">11:00</option>
+              <option value="12:00">12:00</option>
+              <option value="13:00">13:00</option>
+              <option value="14:00">14:00</option>
+              <option value="15:00">15:00</option>
+              <option value="16:00">16:00</option>
+              <option value="17:00">17:00</option>
+              <option value="18:00">18:00</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="book-notes">Notes for the provider (optional)</label>
+            <textarea id="book-notes" placeholder="Describe the job, location details, or questions…"></textarea>
+          </div>
+
+          <button type="button" class="btn btn--primary" id="submit-booking" disabled>Send booking request</button>
+          <p class="status" id="status-line" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div id="login-gate" class="booking-card login-gate" style="display: none">
+        <h2 class="page-title" style="font-size: 1.25rem">Sign in to book</h2>
+        <p>You need a customer account to send a booking request with your chosen date.</p>
+        <a class="btn btn--primary" href="login.html" id="login-link">Log in</a>
+        <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--muted)">
+          No account? <a href="role-selection.html">Create one</a>
+        </p>
+      </div>
+    </main>
+
+    <div class="success-overlay" id="booking-success-overlay" role="dialog" aria-modal="true" aria-labelledby="booking-success-title" hidden>
+      <div class="success-modal">
+        <div class="success-modal__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path class="success-modal__check" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <p class="success-modal__eyebrow">Booking confirmed</p>
+        <h2 class="success-modal__title" id="booking-success-title">Your request has been successfully submitted</h2>
+        <p class="success-modal__text">We’ve sent your preferred date and details to the provider. You’ll be notified when they respond.</p>
+        <div class="success-modal__progress" aria-hidden="true">
+          <div class="success-modal__progress-bar"></div>
+        </div>
+        <p class="success-modal__hint">Returning to Browse…</p>
+      </div>
+    </div>
+
+    <script src="js/api-config.js"></script>
+    <script src="js/artisan-api.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        var MIN_Y = 2026;
+        var MIN_M = 0;
+        var MIN_D = 1;
+        var MAX_Y = 2030;
+        var MAX_M = 11;
+        var MAX_D = 31;
+
+        var params = new URLSearchParams(window.location.search);
+        var providerId = (params.get("id") || "").trim();
+        var pn = (params.get("pn") || "").trim();
+
+        var back = document.getElementById("back-to-profile");
+        if (back && providerId) {
+          back.href = "provider-profile.html?id=" + encodeURIComponent(providerId) + (pn ? "&pn=" + encodeURIComponent(pn) : "");
+          back.textContent = "← Back to profile";
+        }
+
+        var elErr = document.getElementById("gate-error");
+        var elMain = document.getElementById("main-flow");
+        var elLogin = document.getElementById("login-gate");
+
+        function showError(msg) {
+          if (elErr) {
+            elErr.style.display = "block";
+            elErr.textContent = msg;
+          }
+        }
+
+        if (!providerId) {
+          showError("Missing provider. Open this page from a provider profile.");
+        } else if (!window.ArtisanAuth || typeof ArtisanAuth.getAccessToken !== "function") {
+          showError("Could not load authentication script.");
+        } else if (!ArtisanAuth.getAccessToken()) {
+          elLogin.style.display = "block";
+          var loginA = document.getElementById("login-link");
+          if (loginA) {
+            loginA.addEventListener("click", function () {
+              try {
+                var ret =
+                  (window.location.pathname.split("/").pop() || "book-service.html") +
+                  window.location.search +
+                  window.location.hash;
+                sessionStorage.setItem("artisan_after_login_redirect", ret);
+              } catch (e) {}
+            });
+          }
+        } else {
+          elMain.style.display = "block";
+          initBookingUI();
+        }
+
+        function pad(n) {
+          return n < 10 ? "0" + n : String(n);
+        }
+
+        function isoDate(y, m, d) {
+          return y + "-" + pad(m + 1) + "-" + pad(d);
+        }
+
+        function startOfToday() {
+          var n = new Date();
+          return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+        }
+
+        function dateFromParts(y, m, d) {
+          return new Date(y, m, d);
+        }
+
+        function isPastDate(y, m, d) {
+          return dateFromParts(y, m, d) < startOfToday();
+        }
+
+        function isPastIso(iso) {
+          if (!iso) return true;
+          var p = String(iso).split("-");
+          if (p.length !== 3) return true;
+          var d = new Date(+p[0], +p[1] - 1, +p[2]);
+          return d < startOfToday();
+        }
+
+        function dateAllowed(y, m, d) {
+          if (isPastDate(y, m, d)) return false;
+          var t = dateFromParts(y, m, d);
+          var minT = new Date(MIN_Y, MIN_M, MIN_D);
+          var maxT = new Date(MAX_Y, MAX_M, MAX_D);
+          return t >= minT && t <= maxT;
+        }
+
+        var DATE_INVALID_MSG = "That date is incorrect. Please choose today or a future date.";
+
+        function initBookingUI() {
+          var viewYear;
+          var viewMonth;
+          var selectedISO = null;
+          var now = new Date();
+          if (now.getFullYear() >= MIN_Y) {
+            viewYear = now.getFullYear();
+            viewMonth = now.getMonth();
+          } else {
+            viewYear = MIN_Y;
+            viewMonth = MIN_M;
+          }
+          var label = document.getElementById("provider-label");
+          if (label) {
+            label.textContent = pn ? "Booking with · " + pn : "New booking";
+          }
+
+          var grid = document.getElementById("cal-grid");
+          var monthLabel = document.getElementById("cal-month-label");
+          var btnPrev = document.getElementById("cal-prev");
+          var btnNext = document.getElementById("cal-next");
+          var pill = document.getElementById("selected-pill");
+          var submitBtn = document.getElementById("submit-booking");
+          var statusLine = document.getElementById("status-line");
+          var dateAlert = document.getElementById("date-alert");
+
+          function showDateError() {
+            if (dateAlert) {
+              dateAlert.textContent = DATE_INVALID_MSG;
+              dateAlert.classList.add("is-visible");
+            }
+            if (statusLine) {
+              statusLine.textContent = DATE_INVALID_MSG;
+              statusLine.className = "status status--err";
+            }
+            if (pill) pill.style.display = "none";
+            selectedISO = null;
+            submitBtn.disabled = true;
+            [].forEach.call(grid.querySelectorAll(".cal-day--selected"), function (x) {
+              x.classList.remove("cal-day--selected");
+            });
+          }
+
+          function clearDateError() {
+            if (dateAlert) {
+              dateAlert.textContent = "";
+              dateAlert.classList.remove("is-visible");
+            }
+          }
+
+          function monthStart(y, m) {
+            return new Date(y, m, 1);
+          }
+
+          function daysInMonth(y, m) {
+            return new Date(y, m + 1, 0).getDate();
+          }
+
+          function renderCalendar() {
+            var names = [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December",
+            ];
+            monthLabel.textContent = names[viewMonth] + " " + viewYear;
+
+            var first = monthStart(viewYear, viewMonth);
+            var startPad = (first.getDay() + 6) % 7;
+            var dim = daysInMonth(viewYear, viewMonth);
+            grid.innerHTML = "";
+            var i;
+            for (i = 0; i < startPad; i++) {
+              var ph = document.createElement("button");
+              ph.type = "button";
+              ph.className = "cal-day cal-day--muted";
+              ph.disabled = true;
+              grid.appendChild(ph);
+            }
+            var today = new Date();
+            var tY = today.getFullYear();
+            var tM = today.getMonth();
+            var tD = today.getDate();
+
+            for (var day = 1; day <= dim; day++) {
+              (function (d) {
+                var btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "cal-day";
+                btn.textContent = String(d);
+                var past = isPastDate(viewYear, viewMonth, d);
+                var allowed = dateAllowed(viewYear, viewMonth, d);
+                if (past) {
+                  btn.classList.add("cal-day--past");
+                  btn.setAttribute("aria-disabled", "true");
+                  btn.addEventListener("click", function () {
+                    showDateError();
+                  });
+                } else if (!allowed) {
+                  btn.classList.add("cal-day--disabled");
+                  btn.disabled = true;
+                } else {
+                  if (viewYear === tY && viewMonth === tM && d === tD) btn.classList.add("cal-day--today");
+                  var iso = isoDate(viewYear, viewMonth, d);
+                  if (selectedISO === iso) btn.classList.add("cal-day--selected");
+                  btn.addEventListener("click", function () {
+                    selectedISO = iso;
+                    [].forEach.call(grid.querySelectorAll(".cal-day--selected"), function (x) {
+                      x.classList.remove("cal-day--selected");
+                    });
+                    btn.classList.add("cal-day--selected");
+                    pill.style.display = "block";
+                    pill.textContent = "Selected: " + iso + " (local date)";
+                    submitBtn.disabled = false;
+                    clearDateError();
+                    if (statusLine) {
+                      statusLine.textContent = "";
+                      statusLine.className = "status";
+                    }
+                  });
+                }
+                grid.appendChild(btn);
+              })(day);
+            }
+
+            var today0 = startOfToday();
+            var minView = new Date(MIN_Y, MIN_M, 1);
+            var earliestView = new Date(today0.getFullYear(), today0.getMonth(), 1);
+            if (earliestView > minView) minView = earliestView;
+            var curView = new Date(viewYear, viewMonth, 1);
+            btnPrev.disabled = curView <= minView;
+
+            var maxView = new Date(MAX_Y, MAX_M, 1);
+            btnNext.disabled = curView >= maxView;
+          }
+
+          btnPrev.addEventListener("click", function () {
+            if (viewMonth === 0) {
+              viewYear--;
+              viewMonth = 11;
+            } else {
+              viewMonth--;
+            }
+            renderCalendar();
+          });
+          btnNext.addEventListener("click", function () {
+            if (viewMonth === 11) {
+              viewYear++;
+              viewMonth = 0;
+            } else {
+              viewMonth++;
+            }
+            renderCalendar();
+          });
+
+          renderCalendar();
+
+          submitBtn.addEventListener("click", function () {
+            if (!selectedISO) return;
+            if (isPastIso(selectedISO)) {
+              showDateError();
+              return;
+            }
+            var time = document.getElementById("time-slot").value;
+            var notes = (document.getElementById("book-notes").value || "").trim();
+            statusLine.textContent = "";
+            var parts = ["Hi! I'd like to book a service. Requested date: " + selectedISO];
+            if (time) parts.push("Time: " + time);
+            if (notes) parts.push("Notes: " + notes);
+            var body = parts.join(". ");
+
+            submitBtn.disabled = true;
+            var sendFn =
+              window.ArtisanAuth && ArtisanAuth.createServiceRequest
+                ? ArtisanAuth.createServiceRequest
+                : null;
+            if (!sendFn) {
+              submitBtn.disabled = false;
+              statusLine.textContent = "Booking API not loaded.";
+              statusLine.className = "status status--err";
+              return;
+            }
+            sendFn({ providerProfileId: providerId, body: body }).then(function (res) {
+              if (!res.ok) {
+                submitBtn.disabled = false;
+                var err =
+                  res.data && res.data.error ? String(res.data.error) : "Could not send (" + res.status + ").";
+                statusLine.textContent = err;
+                statusLine.className = "status status--err";
+                return;
+              }
+              statusLine.textContent = "";
+              statusLine.className = "status";
+              showBookingSuccessAndRedirect();
+            });
+          });
+
+          var BROWSE_URL = "customer-services.html";
+          var SUCCESS_DISPLAY_MS = 3000;
+
+          function showBookingSuccessAndRedirect() {
+            var overlay = document.getElementById("booking-success-overlay");
+            if (!overlay) {
+              window.location.href = BROWSE_URL;
+              return;
+            }
+            overlay.hidden = false;
+            requestAnimationFrame(function () {
+              overlay.classList.add("is-visible");
+            });
+            document.body.style.overflow = "hidden";
+            setTimeout(function () {
+              window.location.href = BROWSE_URL;
+            }, SUCCESS_DISPLAY_MS);
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>

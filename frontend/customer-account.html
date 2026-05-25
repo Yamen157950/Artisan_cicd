@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Manage your Artisan customer account — profile, security, and provider resources." />
+    <title>My Account | Artisan</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a href="index.html" class="logo" aria-label="Artisan home">
+          <span class="logo__mark" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          Artisan
+        </a>
+        <nav class="main-nav main-nav--premium main-nav--premium--no-left-links" aria-label="Main navigation">
+          <div class="main-nav__center" id="main-nav-center" aria-hidden="true"></div>
+          <div class="main-nav__toolbar main-nav__actions" id="main-nav-auth">
+            <a href="customer-services.html" class="main-nav__btn main-nav__btn--ghost">Browse</a>
+            <a href="login.html" class="main-nav__btn main-nav__btn--ghost">Log in</a>
+            <a href="role-selection.html" class="main-nav__btn main-nav__btn--primary">Sign up</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="dashboard-page customer-account-page">
+        <div class="container dashboard-layout">
+          <div class="provider-sidebar-col">
+            <aside class="dashboard-card customer-account-profile-card">
+              <div class="customer-account-avatar-wrap">
+                <img
+                  id="customer-avatar"
+                  class="customer-account-avatar"
+                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=80"
+                  width="112"
+                  height="112"
+                  alt="Your profile photo"
+                />
+              </div>
+              <input id="customer-photo-input" type="file" accept="image/*" hidden />
+              <div class="customer-account-photo-actions">
+                <button type="button" class="btn btn--ghost btn--sm" id="customer-photo-btn">Change photo</button>
+                <button type="button" class="btn btn--ghost btn--sm" id="customer-remove-photo-btn" hidden>Remove</button>
+              </div>
+              <h2 class="customer-account-sidebar-name" id="customer-sidebar-name">…</h2>
+              <p class="customer-account-sidebar-email" id="customer-sidebar-email"></p>
+              <p class="customer-account-sidebar-phone" id="customer-sidebar-phone" hidden></p>
+              <p class="customer-account-sidebar-hint">Photo is stored with your Artisan profile.</p>
+            </aside>
+
+            <nav class="dashboard-card dashboard-sidebar customer-account-quick-nav" aria-label="Quick links">
+              <h3 class="customer-account-card-heading">Quick links</h3>
+              <div class="customer-account-nav-links">
+                <a href="customer-services.html">Find providers</a>
+                <a href="chat-thread.html" data-auth-only hidden>My chats</a>
+                <a href="login.html?logout=1">Log out</a>
+              </div>
+            </nav>
+          </div>
+
+          <div class="dashboard-shell">
+            <div id="customer-account-error" class="customer-account-error-banner" hidden role="alert"></div>
+
+            <form id="customer-account-form" class="dashboard-card" novalidate>
+              <h1 class="dashboard-card__title">Profile details</h1>
+              <p class="customer-account-card-lead">Update how you appear to providers when you message or book.</p>
+
+              <div class="form-group">
+                <label for="customer-account-email">Email</label>
+                <div id="customer-account-email" class="customer-account-readonly-field" aria-live="polite">…</div>
+                <p class="customer-account-field-hint">Sign-in email. To change it, contact support for now.</p>
+              </div>
+              <div class="form-group">
+                <label for="customer-account-fullname">Full name</label>
+                <input id="customer-account-fullname" name="fullName" type="text" autocomplete="name" required minlength="2" maxlength="120" />
+              </div>
+              <div class="form-group">
+                <label for="customer-account-phone">Phone <span class="label-optional">(optional)</span></label>
+                <input id="customer-account-phone" name="phone" type="tel" autocomplete="tel" maxlength="40" />
+              </div>
+              <div class="customer-account-form-actions">
+                <button type="submit" class="btn btn--primary">Save changes</button>
+              </div>
+            </form>
+
+            <section class="dashboard-card" aria-labelledby="sec-security">
+              <h2 class="dashboard-card__title" id="sec-security">Sign-in &amp; security</h2>
+              <p class="customer-account-card-lead">Manage how you access Artisan.</p>
+              <div class="customer-account-link-row">
+                <div>
+                  <div class="customer-account-row-title">Google</div>
+                  <div class="customer-account-row-desc" id="customer-linked-google-status">—</div>
+                </div>
+                <a class="btn btn--ghost btn--sm" href="login.html">Add or switch account</a>
+              </div>
+              <div class="customer-account-link-row">
+                <div>
+                  <div class="customer-account-row-title">Password</div>
+                  <div class="customer-account-row-desc">Use “Forgot password?” on the login page after you sign out.</div>
+                </div>
+                <a class="btn btn--ghost btn--sm" href="login.html">Go to login</a>
+              </div>
+            </section>
+
+            <section class="dashboard-card" aria-labelledby="sec-provider">
+              <h2 class="dashboard-card__title" id="sec-provider">Provider hub</h2>
+              <p class="customer-account-card-lead">
+                If you want to offer services on Artisan, create a <strong>new account</strong> as a provider — it has its own sign-in, separate from this customer account. Choose <strong>Provider</strong> when you sign up.
+              </p>
+              <div class="customer-account-hub-actions">
+                <a class="btn btn--primary" href="role-selection.html">Become a provider</a>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__bottom">© <span id="year"></span> Artisan.</div>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+    <script src="js/api-config.js"></script>
+    <script src="js/artisan-api.js"></script>
+    <script src="js/app.js" defer></script>
+  </body>
+</html>

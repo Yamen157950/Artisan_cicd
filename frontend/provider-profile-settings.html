@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Edit your Artisan provider profile — trade, bio, portfolio, and rates." />
+    <title>Profile Settings | Artisan</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a href="index.html" class="logo" aria-label="Artisan home">
+          <span class="logo__mark" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          Artisan
+        </a>
+        <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <nav class="nav" data-nav-panel aria-label="Main">
+          <a href="index.html" class="nav__link">Home</a>
+          <a href="provider-dashboard.html" class="nav__link" data-nav>Dashboard</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="dashboard-page">
+        <div class="container dashboard-layout">
+          <div class="provider-sidebar-col">
+            <aside class="dashboard-card dashboard-sidebar">
+              <h2 class="dashboard-sidebar__title">Provider Panel</h2>
+              <nav class="dashboard-sidebar__nav" aria-label="Provider dashboard">
+                <a href="provider-dashboard.html" class="dashboard-link">Overview</a>
+                <a href="provider-requests.html" class="dashboard-link">My Requests</a>
+                <a href="provider-requests.html#booking-history" class="dashboard-link">History</a>
+                <a href="chat-thread.html" class="dashboard-link">My Chats</a>
+                <a href="provider-profile-settings.html" class="dashboard-link dashboard-link--active">Profile Settings</a>
+                <a href="login.html?logout=1" class="dashboard-link">Logout</a>
+              </nav>
+            </aside>
+
+            <div class="dashboard-card availability-card">
+              <h3 class="availability-card__title">Available</h3>
+              <p class="availability-card__hint">When off, you are unavailable — customers cannot find your profile when browsing providers.</p>
+              <button
+                type="button"
+                id="provider-availability-toggle"
+                class="availability-switch"
+                role="switch"
+                aria-checked="true"
+                aria-label="Toggle availability for customers"
+              >
+                <span class="availability-switch__track" aria-hidden="true">
+                  <span class="availability-switch__thumb"></span>
+                </span>
+                <span class="availability-switch__text">On</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="dashboard-shell">
+            <article class="dashboard-card">
+              <h1 class="dashboard-card__title">Profile settings</h1>
+              <p style="color: var(--color-text-muted); margin-bottom: 1.5rem">
+                Changes sync to the Artisan server when you are signed in as a provider.
+              </p>
+
+              <form id="provider-profile-form" class="provider-profile-form" novalidate>
+                <div class="form-group">
+                  <label for="provider-name">Full name</label>
+                  <input id="provider-name" name="name" type="text" autocomplete="name" required />
+                </div>
+                <div class="form-group">
+                  <label for="provider-trade-select">Trade / specialization</label>
+                  <select id="provider-trade-select" name="trade" required>
+                    <option value="">Select trade…</option>
+                    <option value="Plumbing">Plumbing</option>
+                    <option value="Carpentry">Carpentry</option>
+                    <option value="Electrical">Electrical</option>
+                    <option value="Cleaning">Cleaning</option>
+                    <option value="Painting">Painting</option>
+                    <option value="Barber">Barber</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="provider-governorate">Governorate</label>
+                  <select id="provider-governorate" name="governorate">
+                    <option value="">Select governorate…</option>
+                    <option value="Amman">Amman</option>
+                    <option value="Zarqa">Zarqa</option>
+                    <option value="Irbid">Irbid</option>
+                    <option value="Balqa">Balqa</option>
+                    <option value="Mafraq">Mafraq</option>
+                    <option value="Jerash">Jerash</option>
+                    <option value="Ajloun">Ajloun</option>
+                    <option value="Madaba">Madaba</option>
+                    <option value="Karak">Karak</option>
+                    <option value="Tafilah">Tafilah</option>
+                    <option value="Ma'an">Ma'an</option>
+                    <option value="Aqaba">Aqaba</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="provider-bio">Professional bio</label>
+                  <textarea id="provider-bio" name="bio" rows="4" placeholder="Short description for customers…"></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="provider-avatar-input">Profile photo</label>
+                  <input id="provider-avatar-input" type="file" accept="image/*" />
+                  <div class="provider-settings-avatar-preview" aria-live="polite">
+                    <img
+                      id="provider-avatar-preview"
+                      class="provider-avatar"
+                      width="112"
+                      height="112"
+                      src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=80"
+                      alt="Profile photo preview"
+                    />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="provider-work-input">Work samples (images)</label>
+                  <input id="provider-work-input" type="file" accept="image/*" multiple />
+                  <div id="provider-work-gallery" class="provider-work-gallery" aria-label="Work samples"></div>
+                </div>
+                <div class="form-group form-group--inline">
+                  <div>
+                    <label for="provider-price">Rate (JOD)</label>
+                    <input id="provider-price" name="price" type="text" inputmode="decimal" placeholder="e.g. 25" />
+                  </div>
+                  <div>
+                    <label for="provider-price-unit">Per</label>
+                    <select id="provider-price-unit" name="priceUnit">
+                      <option value="hour">Hour</option>
+                      <option value="day">Day</option>
+                      <option value="week">Week</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="provider-experience">Years of experience</label>
+                  <input id="provider-experience" name="experience" type="number" min="0" max="80" step="1" placeholder="Optional" />
+                </div>
+                <button type="submit" class="btn btn--primary">Save profile</button>
+              </form>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__bottom">© <span id="year"></span> Artisan.</div>
+      </div>
+    </footer>
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+    <script src="js/api-config.js"></script>
+    <script src="js/artisan-api.js"></script>
+    <script src="js/app.js" defer></script>
+  </body>
+</html>

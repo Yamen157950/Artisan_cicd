@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Artisan provider — incoming service requests from customers." />
+    <title>My Requests | Artisan</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .request-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .request-card {
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: var(--radius-md, 10px);
+        padding: 1rem 1.15rem;
+        background: rgba(255, 255, 255, 0.04);
+        text-align: left;
+      }
+      .request-card__meta {
+        font-size: 0.85rem;
+        color: var(--color-text-muted, #94a3b8);
+        margin-bottom: 0.5rem;
+      }
+      .request-card__body {
+        margin: 0 0 0.85rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .request-card__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .request-card__status {
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+      .request-card__status--pending {
+        color: #fbbf24;
+      }
+      .request-card__status--accepted {
+        color: #4ade80;
+      }
+      .request-card__status--rejected {
+        color: #f87171;
+      }
+      .btn-req {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0.35rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        border: none;
+        font-family: inherit;
+      }
+      .btn-req--accept {
+        background: #16a34a;
+        color: #fff;
+      }
+      .btn-req--reject {
+        background: transparent;
+        color: #fecaca;
+        border: 1px solid rgba(248, 113, 113, 0.5);
+      }
+      .btn-req:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .request-card__chat {
+        font-size: 0.875rem;
+      }
+      .request-card__chat a {
+        color: #93c5fd;
+      }
+      .requests-section {
+        margin-bottom: 1.75rem;
+      }
+      .requests-section:last-of-type {
+        margin-bottom: 0;
+      }
+      .requests-section__title {
+        font-size: 1.15rem;
+        margin: 0 0 0.35rem;
+        font-weight: 700;
+      }
+      .requests-section__hint {
+        color: var(--color-text-muted);
+        margin: 0 0 1rem;
+        line-height: 1.5;
+        font-size: 0.9rem;
+      }
+      .requests-empty {
+        padding: 1.25rem 1rem;
+        text-align: center;
+        border-radius: var(--radius-md, 8px);
+        background: rgba(15, 23, 42, 0.35);
+        color: var(--color-text-muted);
+        font-size: 0.9rem;
+      }
+      .requests-api-error {
+        display: none;
+        margin-bottom: 1rem;
+        padding: 0.85rem 1rem;
+        border-radius: var(--radius-md, 8px);
+        border: 1px solid rgba(248, 113, 113, 0.45);
+        background: rgba(127, 29, 29, 0.25);
+        color: #fecaca;
+        line-height: 1.45;
+        font-size: 0.9rem;
+      }
+      .requests-api-error.requests-api-error--visible {
+        display: block;
+      }
+      .requests-hint-profile {
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--color-text-muted);
+        word-break: break-all;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a href="index.html" class="logo" aria-label="Artisan home">
+          <span class="logo__mark" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          Artisan
+        </a>
+        <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <nav class="nav" data-nav-panel aria-label="Main">
+          <a href="index.html" class="nav__link">Home</a>
+          <a href="provider-dashboard.html" class="nav__link" data-nav>Dashboard</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="dashboard-page">
+        <div class="container dashboard-layout">
+          <div class="provider-sidebar-col">
+            <aside class="dashboard-card dashboard-sidebar">
+              <h2 class="dashboard-sidebar__title">Provider Panel</h2>
+              <nav class="dashboard-sidebar__nav" aria-label="Provider dashboard">
+                <a href="provider-dashboard.html" class="dashboard-link">Overview</a>
+                <a href="provider-requests.html" class="dashboard-link dashboard-link--active" id="nav-requests">My Requests</a>
+                <a href="provider-requests.html#booking-history" class="dashboard-link" id="nav-history">History</a>
+                <a href="chat-thread.html" class="dashboard-link">My Chats</a>
+                <a href="provider-profile-settings.html" class="dashboard-link">Profile Settings</a>
+                <a href="login.html?logout=1" class="dashboard-link">Logout</a>
+              </nav>
+            </aside>
+
+            <div class="dashboard-card availability-card">
+              <h3 class="availability-card__title">Available</h3>
+              <p class="availability-card__hint">When off, you are unavailable — customers cannot find your profile when browsing providers.</p>
+              <button
+                type="button"
+                id="provider-availability-toggle"
+                class="availability-switch"
+                role="switch"
+                aria-checked="true"
+                aria-label="Toggle availability for customers"
+              >
+                <span class="availability-switch__track" aria-hidden="true">
+                  <span class="availability-switch__thumb"></span>
+                </span>
+                <span class="availability-switch__text">On</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="dashboard-shell">
+            <article class="dashboard-card">
+              <h1 class="dashboard-card__title">Bookings</h1>
+              <p style="color: var(--color-text-muted); margin-bottom: 1rem; line-height: 1.5">
+                Customer requests from <strong>Send booking request</strong> on the calendar page appear under <strong>My requests</strong>. After you accept or reject, they move to
+                <strong>History</strong> — only your account can see this list.
+              </p>
+              <div id="requests-api-error" class="requests-api-error" role="alert" hidden></div>
+              <div id="requests-load" style="color: var(--color-text-muted); margin-bottom: 0.75rem">Loading…</div>
+
+              <section class="requests-section" aria-labelledby="pending-heading">
+                <h2 class="requests-section__title" id="pending-heading">My requests</h2>
+                <p class="requests-section__hint">
+                  Open requests you can <strong>Accept</strong> or <strong>Reject</strong>. Accepted jobs — continue in
+                  <a href="chat-thread.html" style="color: #93c5fd">My Chats</a>.
+                </p>
+                <div id="requests-pending-list" class="request-list" aria-live="polite"></div>
+              </section>
+
+              <section class="requests-section" id="booking-history" aria-labelledby="history-heading">
+                <h2 class="requests-section__title" id="history-heading">History</h2>
+                <p class="requests-section__hint">All accepted and rejected booking requests, newest first. This history is private to you as the provider.</p>
+                <div id="requests-history-list" class="request-list" aria-live="polite"></div>
+              </section>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__bottom">© <span id="year"></span> Artisan.</div>
+      </div>
+    </footer>
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+    <script src="js/api-config.js"></script>
+    <script src="js/artisan-api.js"></script>
+    <script src="js/app.js" defer></script>
+    <script>
+      (function () {
+        var loadEl = document.getElementById("requests-load");
+        var errEl = document.getElementById("requests-api-error");
+        var pendingEl = document.getElementById("requests-pending-list");
+        var historyEl = document.getElementById("requests-history-list");
+
+        function showApiError(msg) {
+          if (!errEl) return;
+          errEl.hidden = false;
+          errEl.classList.add("requests-api-error--visible");
+          errEl.textContent = msg || "";
+        }
+
+        function clearApiError() {
+          if (!errEl) return;
+          errEl.hidden = true;
+          errEl.classList.remove("requests-api-error--visible");
+          errEl.textContent = "";
+        }
+
+        function pick(obj, camel, pascal) {
+          if (!obj) return undefined;
+          if (obj[camel] !== undefined && obj[camel] !== null) return obj[camel];
+          if (obj[pascal] !== undefined && obj[pascal] !== null) return obj[pascal];
+          return undefined;
+        }
+
+        /** API may return camelCase or PascalCase; also tolerate wrapped JSON. */
+        function normalizeServiceRequest(raw) {
+          if (!raw || typeof raw !== "object") return null;
+          var id = pick(raw, "id", "Id");
+          if (id == null || id === "") return null;
+          var status = String(pick(raw, "status", "Status") || "").toLowerCase();
+          return {
+            id: String(id),
+            customerUserId: String(pick(raw, "customerUserId", "CustomerUserId") || ""),
+            customerName: String(pick(raw, "customerName", "CustomerName") || ""),
+            body: String(pick(raw, "body", "Body") || ""),
+            status: status || "pending",
+            createdAt: pick(raw, "createdAt", "CreatedAt"),
+            respondedAt: pick(raw, "respondedAt", "RespondedAt"),
+          };
+        }
+
+        function extractRequestsArray(data) {
+          if (data == null) return [];
+          if (Array.isArray(data)) return data;
+          var inner = pick(data, "items", "Items") || pick(data, "data", "Data");
+          if (Array.isArray(inner)) return inner;
+          return [];
+        }
+
+        function esc(s) {
+          return String(s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+        }
+
+        function statusClass(st) {
+          var s = (st || "").toLowerCase();
+          if (s === "pending") return "request-card__status--pending";
+          if (s === "accepted") return "request-card__status--accepted";
+          if (s === "rejected") return "request-card__status--rejected";
+          return "";
+        }
+
+        function sortByCreatedDesc(a, b) {
+          var ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          var tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return tb - ta;
+        }
+
+        function sortHistoryDesc(a, b) {
+          var ra = a.respondedAt ? new Date(a.respondedAt).getTime() : 0;
+          var rb = b.respondedAt ? new Date(b.respondedAt).getTime() : 0;
+          if (rb !== ra) return rb - ra;
+          return sortByCreatedDesc(a, b);
+        }
+
+        function cardHtml(r, opts) {
+          var showActions = opts && opts.showActions;
+          var pending = (r.status || "").toLowerCase() === "pending";
+          var dateStr = r.createdAt ? new Date(r.createdAt).toLocaleString() : "—";
+          var btns =
+            showActions && pending
+              ? '<button type="button" class="btn-req btn-req--accept" data-action="accepted" data-id="' +
+                esc(r.id) +
+                '">Accept</button>' +
+                '<button type="button" class="btn-req btn-req--reject" data-action="rejected" data-id="' +
+                esc(r.id) +
+                '">Reject</button>'
+              : "";
+          var chatHref = "chat-thread.html";
+          if (r.customerUserId) {
+            chatHref += "?partner=" + encodeURIComponent(String(r.customerUserId));
+          }
+          var chatHint =
+            (r.status || "").toLowerCase() === "accepted"
+              ? '<p class="request-card__chat"><a href="' +
+                esc(chatHref) +
+                '">Open My Chats</a> to message ' +
+                esc(r.customerName || "the customer") +
+                ".</p>"
+              : "";
+          var responded =
+            !pending && r.respondedAt
+              ? '<div class="request-card__meta" style="margin-top: 0.35rem">Responded: ' +
+                esc(new Date(r.respondedAt).toLocaleString()) +
+                "</div>"
+              : "";
+          return (
+            '<article class="request-card" data-request-id="' +
+            esc(r.id) +
+            '">' +
+            '<div class="request-card__meta">' +
+            esc(r.customerName || "Customer") +
+            " · Sent: " +
+            esc(dateStr) +
+            "</div>" +
+            '<p class="request-card__body">' +
+            esc(r.body || "") +
+            "</p>" +
+            responded +
+            '<div class="request-card__actions">' +
+            '<span class="request-card__status ' +
+            statusClass(r.status) +
+            '">' +
+            esc((r.status || "").charAt(0).toUpperCase() + (r.status || "").slice(1)) +
+            "</span>" +
+            btns +
+            "</div>" +
+            chatHint +
+            "</article>"
+          );
+        }
+
+        function renderEmptyPending(profileHintHtml) {
+          return (
+            '<div class="requests-empty" role="status">' +
+            "<strong>No open requests</strong><br />" +
+            "When a customer sends a booking from the calendar, it will appear here for you to accept or reject." +
+            (profileHintHtml || "") +
+            "</div>"
+          );
+        }
+
+        function renderEmptyHistory() {
+          return (
+            '<div class="requests-empty" role="status">' +
+            "<strong>No history yet</strong><br />" +
+            "Accepted and rejected bookings will appear here. Only you can see this list." +
+            "</div>"
+          );
+        }
+
+        function render(rows) {
+          if (loadEl) loadEl.style.display = "none";
+          var rawList = extractRequestsArray(rows);
+          var all = rawList.map(normalizeServiceRequest).filter(Boolean);
+          var pending = all
+            .filter(function (r) {
+              return (r.status || "").toLowerCase() === "pending";
+            })
+            .sort(sortByCreatedDesc);
+          var history = all
+            .filter(function (r) {
+              var s = (r.status || "").toLowerCase();
+              return s === "accepted" || s === "rejected";
+            })
+            .sort(sortHistoryDesc);
+
+          var profileId =
+            (window.ArtisanAuth && ArtisanAuth.getProviderProfileId && ArtisanAuth.getProviderProfileId()) || "";
+          var hint =
+            pending.length === 0 && profileId
+              ? '<p class="requests-hint-profile">Your provider profile id (must match the <code>?id=</code> on the customer\'s booking link):<br /><code>' +
+                esc(profileId) +
+                "</code></p>"
+              : "";
+
+          if (pendingEl) {
+            pendingEl.innerHTML = pending.length
+              ? pending.map(function (r) { return cardHtml(r, { showActions: true }); }).join("")
+              : renderEmptyPending(hint);
+          }
+          if (historyEl) {
+            historyEl.innerHTML = history.length ? history.map(function (r) { return cardHtml(r, { showActions: false }); }).join("") : renderEmptyHistory();
+          }
+        }
+
+        function syncNavActive() {
+          var hist = (window.location.hash || "").toLowerCase() === "#booking-history";
+          var nReq = document.getElementById("nav-requests");
+          var nHist = document.getElementById("nav-history");
+          if (nReq) nReq.classList.toggle("dashboard-link--active", !hist);
+          if (nHist) nHist.classList.toggle("dashboard-link--active", hist);
+        }
+
+        function scrollToHashSection() {
+          if ((window.location.hash || "").toLowerCase() !== "#booking-history") return;
+          var el = document.getElementById("booking-history");
+          if (el) {
+            setTimeout(function () {
+              el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 100);
+          }
+        }
+
+        function run() {
+          clearApiError();
+          if (!window.ArtisanAuth || !ArtisanAuth.getProviderServiceRequests) {
+            if (loadEl) loadEl.textContent = "Could not load API.";
+            return;
+          }
+          if (!ArtisanAuth.getAccessToken()) {
+            if (loadEl) loadEl.innerHTML = 'Please <a href="login.html" style="color:#93c5fd">log in</a> as a provider.';
+            return;
+          }
+
+          if (loadEl) {
+            loadEl.style.display = "block";
+            loadEl.textContent = "Loading…";
+          }
+
+          ArtisanAuth.getProviderServiceRequests().then(function (res) {
+            if (!res.ok) {
+              if (loadEl) loadEl.style.display = "none";
+              var errMsg =
+                res.status === 403
+                  ? "This endpoint is restricted to provider accounts. Log out, then log in with the same email you used when you registered as a provider. (If you only have a customer account, create a separate provider account to see incoming bookings.)"
+                  : res.status === 401
+                    ? "Your session expired. Please log in again."
+                    : res.data && res.data.error
+                      ? String(res.data.error)
+                      : "Could not load requests (HTTP " + res.status + "). Check that the API is running and api-config.js points to the correct URL.";
+              showApiError(errMsg);
+              render([]);
+              return;
+            }
+            clearApiError();
+            render(res.data);
+            syncNavActive();
+            scrollToHashSection();
+          });
+        }
+
+        window.addEventListener("hashchange", function () {
+          syncNavActive();
+          scrollToHashSection();
+        });
+
+        var listEl = pendingEl;
+        if (listEl) {
+          listEl.addEventListener("click", function (e) {
+            var btn = e.target.closest("button[data-action][data-id]");
+            if (!btn || !window.ArtisanAuth || !ArtisanAuth.updateServiceRequestStatus) return;
+            var id = btn.getAttribute("data-id");
+            var action = btn.getAttribute("data-action");
+            if (!id || !action) return;
+            btn.disabled = true;
+            ArtisanAuth.updateServiceRequestStatus(id, action === "accepted" ? "accepted" : "rejected").then(function (res) {
+              if (!res.ok) {
+                btn.disabled = false;
+                var errMsg = res.data && res.data.error ? String(res.data.error) : "Update failed (" + res.status + ").";
+                if (window.ArtisanUI && typeof window.ArtisanUI.showToast === "function") {
+                  window.ArtisanUI.showToast(errMsg, "error");
+                } else {
+                  alert(errMsg);
+                }
+                return;
+              }
+              if (window.ArtisanUI && typeof window.ArtisanUI.showToast === "function") {
+                window.ArtisanUI.showToast(action === "accepted" ? "Booking accepted." : "Booking declined.", "success");
+              }
+              run();
+            });
+          });
+        }
+
+        run();
+      })();
+    </script>
+  </body>
+</html>

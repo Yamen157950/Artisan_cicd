@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Artisan AI helps you find trusted local skilled professionals." />
+    <title>Artisan | Home</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a href="index.html" class="logo" aria-label="Artisan home">Artisan</a>
+        <nav class="main-nav main-nav--premium main-nav--premium--no-left-links" aria-label="Main navigation">
+          <div class="main-nav__center" id="main-nav-center" aria-hidden="true"></div>
+          <div class="main-nav__toolbar main-nav__actions" id="main-nav-auth">
+            <a href="customer-services.html" class="main-nav__btn main-nav__btn--ghost">Browse</a>
+            <a href="login.html" class="main-nav__btn main-nav__btn--ghost">Log in</a>
+            <a href="role-selection.html" class="main-nav__btn main-nav__btn--primary">Sign up</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero__overlay" aria-hidden="true"></div>
+        <section class="hero__content">
+        <h1 class="hero__headline">
+          <span class="hero__headline-line">Find the right skilled professional</span>
+          <span class="hero__headline-line hero__headline-line--accent">with Artisan AI</span>
+        </h1>
+        <p class="hero__lead">Describe your need in seconds and get matched with trusted local experts in Jordan.</p>
+
+        <form class="hero-search" id="hero-search-form" action="customer-services.html" method="get">
+          <input
+            id="ai-search-input"
+            name="q"
+            type="search"
+            aria-label="Ask Artisan AI"
+            placeholder="Ask Artisan AI... e.g., 'Find me a plumber in Amman'"
+          />
+          <button type="submit">Search</button>
+        </form>
+
+        <section class="featured-services" aria-label="Featured services">
+          <a class="service-card" href="customer-services.html?trade=Plumbing">
+            <span class="service-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M14 10a2 2 0 01-2-2V4a2 2 0 114 0v4a2 2 0 01-2 2zM10 8v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-2a2 2 0 012-2h2a2 2 0 012-2h2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M10 18h4M12 14v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <span>Plumbing</span>
+          </a>
+
+          <a class="service-card" href="customer-services.html?trade=Carpentry">
+            <span class="service-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+            <span>Carpentry</span>
+          </a>
+
+          <a class="service-card" href="customer-services.html?trade=Electrical">
+            <span class="service-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span>Electrical</span>
+          </a>
+
+          <a class="service-card" href="customer-services.html?trade=Cleaning">
+            <span class="service-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M9 11V6a3 3 0 116 0v5M7 11h10l-1 9H8l-1-9z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span>Cleaning</span>
+          </a>
+
+          <a class="service-card" href="customer-services.html?trade=Painting">
+            <span class="service-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M3 21l3-3m0 0l11-11a2.12 2.12 0 013 3L9 21H6v-3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span>Painting</span>
+          </a>
+
+          <a class="service-card" href="customer-services.html?trade=Barber">
+            <span class="service-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="6" cy="6" r="3" />
+                <circle cx="6" cy="18" r="3" />
+                <path d="M20 4 8.12 15.88M14.47 14.48 20 20" />
+                <path d="m8.12 8.12 3.88 3.88" />
+              </svg>
+            </span>
+            <span>Barber</span>
+          </a>
+        </section>
+      </section>
+    </section>
+
+    </main>
+
+    <script src="js/api-config.js"></script>
+    <script src="js/artisan-api.js"></script>
+    <script src="js/app.js" defer></script>
+    <script>
+      (function () {
+        var input = document.getElementById("ai-search-input");
+        if (!input) return;
+        var hints = [
+          "Ask Artisan AI... e.g., 'Find me a plumber in Amman'",
+          "Ask Artisan AI... e.g., 'Need a carpenter for custom furniture'",
+          "Ask Artisan AI... e.g., 'Book an electrician near me today'",
+        ];
+        var i = 0;
+        setInterval(function () {
+          i = (i + 1) % hints.length;
+          input.placeholder = hints[i];
+        }, 2800);
+
+        /** Guess trade from plain-language search to pre-filter Browse (optional). */
+        function inferTradeFromQuery(text) {
+          var t = (text || "").toLowerCase();
+          if (/plumb|سباكة|صحي|faucet|leak/.test(t)) return "Plumbing";
+          if (/carpent|نجار|خشب|furniture|shelf|door/.test(t)) return "Carpentry";
+          if (/electric|كهرباء|كهربائي|wiring|panel/.test(t)) return "Electrical";
+          if (/clean|تنظيف|maid|deep clean/.test(t)) return "Cleaning";
+          if (/paint|دهان|brush|wall/.test(t)) return "Painting";
+          if (/barber|حلاق|haircut|salon/.test(t)) return "Barber";
+          return "";
+        }
+
+        var form = document.getElementById("hero-search-form");
+        if (form) {
+          form.addEventListener("submit", function (e) {
+            var q = (input.value || "").trim();
+            var trade = inferTradeFromQuery(q);
+            if (!q && !trade) {
+              e.preventDefault();
+              window.location.href = "customer-services.html";
+              return;
+            }
+            e.preventDefault();
+            var params = new URLSearchParams();
+            if (q) params.set("q", q);
+            if (trade) params.set("trade", trade);
+            var qs = params.toString();
+            window.location.href = "customer-services.html" + (qs ? "?" + qs : "");
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

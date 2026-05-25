@@ -1,0 +1,3 @@
+{"sessionId":"183e71","runId":"post-fix","hypothesisId":"A-E","location":"provider-profile.html:run","message":"provider-profile load context","data":{"href":"http://localhost:5500/provider-profile","search":"","queryId":"","referrer":"http://localhost:5500/customer-services"},"timestamp":1778854948009}
+{"sessionId":"183e71","runId":"post-fix","hypothesisId":"E","location":"provider-profile.html:runWithId","message":"resolved provider id","data":{"id":"","href":"http://localhost:5500/provider-profile"},"timestamp":1778854948023}
+{"sessionId":"183e71","runId":"post-fix","hypothesisId":"A","location":"provider-profile.html:runWithId","message":"still missing id after resolve","data":{"href":"http://localhost:5500/provider-profile"},"timestamp":1778854948023}

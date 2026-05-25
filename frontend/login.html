@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Log in to Artisan — your hub for services and skilled trades." />
+    <title>Log in | Artisan</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a href="index.html" class="logo" aria-label="Artisan home">
+          <span class="logo__mark" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          Artisan
+        </a>
+        <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <nav class="nav" data-nav-panel aria-label="Main">
+          <a href="index.html" class="nav__link" data-nav>Home</a>
+          <a href="index.html#features" class="nav__link">Features</a>
+          <a href="role-selection.html" class="nav__link">Get Started</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="auth-layout">
+        <div class="container">
+          <div class="auth-card">
+            <h1>Welcome back</h1>
+            <p class="auth-card__sub">Sign in to browse services, manage your cart, and message providers — all in one place.</p>
+
+            <form id="login-form" novalidate>
+              <div class="form-group">
+                <label for="login-email">Email</label>
+                <input id="login-email" name="email" type="email" autocomplete="email" required />
+                <p class="form-error" role="alert"></p>
+              </div>
+              <div class="form-group">
+                <label for="login-password">Password</label>
+                <input id="login-password" name="password" type="password" autocomplete="current-password" required />
+                <p class="form-error" role="alert"></p>
+              </div>
+              <div class="form-group checkbox-row" style="justify-content: space-between; flex-wrap: wrap">
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0; cursor: pointer">
+                  <input type="checkbox" id="login-remember" name="remember" style="width: auto; min-height: auto" />
+                  Remember me
+                </label>
+                <a href="forgot-password.html" style="font-size: 0.875rem">Forgot password?</a>
+              </div>
+              <button type="submit" class="btn btn--primary btn--block btn--cta">Log in</button>
+              <p class="text-center mt-2" style="color: var(--color-text-muted); font-size: 0.9375rem">
+                New here? <a href="role-selection.html">Get started</a> or <a href="role-selection.html">create an account</a>
+              </p>
+            </form>
+            <div class="auth-divider" aria-hidden="true"><span>or</span></div>
+            <div id="google-signin-slot" class="google-signin-slot"></div>
+            <p class="auth-google-footnote">First time with Google here? A <strong>customer</strong> account is created unless you use Sign up as a provider.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__grid">
+          <div>
+            <a href="index.html" class="logo" style="color: #f1f5f9; margin-bottom: 0.75rem">
+              <span class="logo__mark" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+              Artisan
+            </a>
+            <p style="margin: 0; font-size: 0.9375rem; max-width: 28ch">
+              A web platform for organizing service supply and demand — connecting skilled trades with people who need them.
+            </p>
+          </div>
+          <div>
+            <h3>Explore</h3>
+            <ul>
+              <li><a href="index.html">Home</a></li>
+              <li><a href="role-selection.html">Get started</a></li>
+              <li><a href="login.html">Log in</a></li>
+              <li><a href="role-selection.html">Create account</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Product</h3>
+            <ul>
+              <li><a href="index.html#features">Features</a></li>
+              <li><a href="role-selection.html">Sign up</a></li>
+              <li><a href="role-selection.html">Choose role</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="site-footer__bottom">© <span id="year"></span> Artisan. Academic project — J.U.S.T. Computer Science.</div>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+    <script src="js/api-config.js"></script>
+    <script src="js/artisan-api.js"></script>
+    <script src="js/app.js" defer></script>
+  </body>
+</html>

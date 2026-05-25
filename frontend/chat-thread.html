@@ -1,0 +1,2492 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Artisan — messages between customers and providers." />
+    <title>Messages | Artisan</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      /* Full-height shell: only the message list scrolls, not the browser page */
+      html {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        height: 100%;
+        min-height: 100%;
+        overflow: hidden;
+      }
+      @supports (height: 100dvh) {
+        html,
+        body {
+          height: 100dvh;
+          max-height: 100dvh;
+          min-height: 100dvh;
+        }
+      }
+
+      /* Standalone messenger — does not depend on dashboard dark theme */
+      .artisan-messenger,
+      .artisan-messenger * {
+        box-sizing: border-box;
+      }
+      .artisan-messenger {
+        --ams-blue: #2563eb;
+        --ams-blue-hover: #1d4ed8;
+        --ams-bg: linear-gradient(165deg, #f0f7ff 0%, #f8fafc 38%, #ffffff 100%);
+        --ams-sidebar: #ffffff;
+        --ams-border: #e2e8f0;
+        --ams-text: #0f172a;
+        --ams-muted: #64748b;
+        --ams-peer-bubble: #ffffff;
+        --ams-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        --ams-avatar-from: #3b82f6;
+        --ams-avatar-to: #6366f1;
+        --ams-accent-soft: #eff6ff;
+        --ams-focus-ring: rgba(37, 99, 235, 0.25);
+        --ams-focus-glow: rgba(37, 99, 235, 0.12);
+        --ams-main-bg: linear-gradient(180deg, #ebf3ff 0%, #f3f6fa 36%, #f6f8fc 70%, #f9fafb 100%);
+        --ams-head-bg: rgba(255, 255, 255, 0.88);
+        --ams-compose-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.94) 100%);
+        height: 100%;
+        max-height: 100%;
+        min-height: 0;
+        margin: 0;
+        display: flex;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", sans-serif;
+        font-size: 15px;
+        color: var(--ams-text);
+        background: var(--ams-bg);
+      }
+      .artisan-messenger [hidden] {
+        display: none !important;
+      }
+      .artisan-messenger__sidebar {
+        width: min(100%, 320px);
+        flex-shrink: 0;
+        background: var(--ams-sidebar);
+        border-right: 1px solid var(--ams-border);
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        height: 100%;
+        overflow: hidden;
+        box-shadow: var(--ams-shadow);
+      }
+      .ams-sidebar-head {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 1.1rem 1rem 0.85rem;
+        border-bottom: 1px solid var(--ams-border);
+      }
+      .ams-sidebar-head h1 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        flex: 1;
+        min-width: 0;
+      }
+      .ams-sidebar-head .ams-sidebar-back {
+        flex-shrink: 0;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+      }
+      .ams-sidebar-head .ams-sidebar-back:hover {
+        background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+        color: var(--ams-blue);
+        border-color: #cbd5e1;
+      }
+      .ams-sidebar-head .ams-sidebar-back:focus-visible {
+        outline: 2px solid var(--ams-focus-ring);
+        outline-offset: 2px;
+      }
+      .ams-icon-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--ams-muted);
+        cursor: pointer;
+      }
+      .ams-icon-btn:hover {
+        background: #f1f5f9;
+        color: var(--ams-text);
+      }
+      .ams-icon-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .ams-search-wrap {
+        padding: 0.75rem 1rem;
+        position: relative;
+      }
+      .ams-search-wrap svg {
+        position: absolute;
+        left: 1.65rem;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: var(--ams-muted);
+      }
+      .ams-search {
+        width: 100%;
+        padding: 0.55rem 0.75rem 0.55rem 2.35rem;
+        border: 1px solid var(--ams-border);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        background: #f8fafc;
+      }
+      .ams-search:focus {
+        outline: 2px solid var(--ams-focus-ring);
+        border-color: var(--ams-blue);
+        background: #fff;
+      }
+      .ams-tabs {
+        display: flex;
+        gap: 0.25rem;
+        padding: 0 1rem;
+        border-bottom: 1px solid var(--ams-border);
+      }
+      .ams-tab {
+        flex: 1;
+        padding: 0.65rem 0.35rem;
+        border: none;
+        background: none;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--ams-muted);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+      }
+      .ams-tab:hover {
+        color: var(--ams-text);
+      }
+      .ams-tab.is-active {
+        color: var(--ams-blue);
+        border-bottom-color: var(--ams-blue);
+      }
+      .ams-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0.35rem 0.5rem 1rem;
+      }
+      .ams-convo {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        width: 100%;
+        text-align: left;
+        padding: 0.75rem 0.65rem;
+        margin: 0.15rem 0;
+        border: none;
+        border-radius: 12px;
+        background: transparent;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
+        position: relative;
+      }
+      .ams-convo:hover {
+        background: #f8fafc;
+      }
+      .ams-convo.is-active {
+        background: var(--ams-accent-soft);
+      }
+      .ams-convo.is-active::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 8px;
+        bottom: 8px;
+        width: 4px;
+        border-radius: 0 4px 4px 0;
+        background: var(--ams-blue);
+      }
+      .ams-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #fff;
+        background: linear-gradient(135deg, var(--ams-avatar-from), var(--ams-avatar-to));
+        position: relative;
+      }
+      .ams-avatar--sm {
+        width: 36px;
+        height: 36px;
+        font-size: 0.8rem;
+      }
+      .ams-online {
+        position: absolute;
+        bottom: 1px;
+        right: 1px;
+        width: 11px;
+        height: 11px;
+        background: #22c55e;
+        border: 2px solid #fff;
+        border-radius: 50%;
+      }
+      .ams-convo-body {
+        flex: 1;
+        min-width: 0;
+      }
+      .ams-convo-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.5rem;
+      }
+      .ams-convo-name {
+        font-weight: 700;
+        font-size: 0.92rem;
+      }
+      .ams-convo-time {
+        font-size: 0.72rem;
+        color: var(--ams-muted);
+        flex-shrink: 0;
+      }
+      .ams-convo-preview {
+        margin-top: 0.2rem;
+        font-size: 0.8rem;
+        color: var(--ams-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .artisan-messenger__main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+        height: 100%;
+        overflow: hidden;
+        background: var(--ams-main-bg);
+      }
+      .ams-empty {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--ams-muted);
+        font-size: 0.95rem;
+        padding: 2rem;
+        min-height: min(40vh, 280px);
+      }
+      .ams-thread {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+      }
+      .ams-thread-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.85rem 1.25rem;
+        border-bottom: 1px solid var(--ams-border);
+        background: var(--ams-head-bg, rgba(255, 255, 255, 0.88));
+        backdrop-filter: blur(10px);
+        flex-shrink: 0;
+        position: relative;
+        z-index: 25;
+      }
+      .ams-thread-head-main {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 0;
+      }
+      .ams-thread-head-text h2 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+      .ams-thread-status {
+        margin: 0.15rem 0 0;
+        font-size: 0.78rem;
+        color: var(--ams-muted);
+      }
+      .ams-thread-status .dot {
+        color: #22c55e;
+        font-weight: 800;
+      }
+      .ams-thread-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 0;
+        padding: 3px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        box-shadow:
+          0 1px 2px rgba(15, 23, 42, 0.05),
+          inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      }
+      .ams-thread-actions > .ams-theme-wrap {
+        display: flex;
+        align-items: center;
+        border-right: 1px solid rgba(226, 232, 240, 0.9);
+      }
+      .ams-thread-actions .ams-icon-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        color: #64748b;
+        background: transparent;
+        transition:
+          color 0.16s ease,
+          background 0.16s ease,
+          box-shadow 0.16s ease;
+      }
+      .ams-thread-actions .ams-icon-btn:hover {
+        background: rgba(255, 255, 255, 0.98);
+        color: var(--ams-blue);
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.07);
+      }
+      .ams-thread-actions .ams-icon-btn:active {
+        background: rgba(241, 245, 249, 0.95);
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+      }
+      .ams-thread-actions .ams-icon-btn:focus-visible {
+        outline: 2px solid var(--ams-focus-ring);
+        outline-offset: 2px;
+        z-index: 1;
+      }
+      .ams-thread-actions .ams-icon-btn svg {
+        flex-shrink: 0;
+      }
+      .ams-theme-wrap {
+        position: relative;
+        overflow: visible;
+      }
+      .ams-theme-panel {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 8px);
+        width: min(300px, calc(100vw - 2rem));
+        max-height: min(340px, 48vh);
+        display: flex;
+        flex-direction: column;
+        border-radius: 14px;
+        border: 1px solid var(--ams-border);
+        background: #fff;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.06);
+        z-index: 50;
+        overflow: hidden;
+        animation: ams-emoji-in 0.18s ease-out;
+      }
+      .ams-theme-panel[hidden] {
+        display: none !important;
+      }
+      .ams-theme-panel-head {
+        padding: 0.65rem 0.85rem;
+        border-bottom: 1px solid #f1f5f9;
+        background: linear-gradient(180deg, #fafbfc 0%, #fff 100%);
+      }
+      .ams-theme-panel-head strong {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--ams-muted);
+      }
+      .ams-theme-panel-head span {
+        display: block;
+        margin-top: 0.15rem;
+        font-size: 0.82rem;
+        color: var(--ams-text);
+        font-weight: 600;
+      }
+      .ams-theme-scroll {
+        overflow-y: auto;
+        padding: 0.65rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      .ams-theme-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+      }
+      @media (min-width: 420px) {
+        .ams-theme-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+      .ams-theme-opt {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 0.25rem;
+        border: 1px solid transparent;
+        border-radius: 12px;
+        background: #f8fafc;
+        cursor: pointer;
+        font: inherit;
+        color: var(--ams-text);
+        transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+      }
+      .ams-theme-opt:hover {
+        border-color: #e2e8f0;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+      }
+      .ams-theme-opt.is-current {
+        border-color: var(--ams-blue);
+        box-shadow: 0 0 0 2px var(--ams-focus-glow);
+      }
+      .ams-theme-opt:active {
+        transform: scale(0.97);
+      }
+      .ams-theme-swatch {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+        background: linear-gradient(135deg, var(--sw-a, #3b82f6), var(--sw-b, #6366f1));
+      }
+      .ams-theme-opt span {
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: var(--ams-muted);
+        text-align: center;
+        line-height: 1.2;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .ams-unread-dot {
+        color: var(--ams-blue);
+        font-weight: 800;
+      }
+      .ams-thread-msgs {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        padding: 1rem 1.25rem 0.5rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      .ams-date-pill {
+        text-align: center;
+        margin: 0.75rem 0 1rem;
+      }
+      .ams-date-pill span {
+        display: inline-block;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        background: #e2e8f0;
+        color: var(--ams-muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      .ams-msg-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        margin-bottom: 0.35rem;
+        max-width: min(85%, 36rem);
+      }
+      .ams-msg-row--mine {
+        margin-left: auto;
+        flex-direction: row;
+        justify-content: flex-end;
+      }
+      .ams-msg-row--peer {
+        margin-right: auto;
+        flex-direction: row;
+      }
+      .ams-av-spacer {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+      }
+      .ams-bubble {
+        padding: 0.65rem 0.85rem;
+        border-radius: 14px;
+        line-height: 1.45;
+        white-space: pre-wrap;
+        word-break: break-word;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+      }
+      .ams-bubble--peer {
+        background: var(--ams-peer-bubble);
+        border: 1px solid var(--ams-border);
+        color: var(--ams-text);
+        border-bottom-left-radius: 4px;
+      }
+      .ams-bubble--mine {
+        background: var(--ams-blue);
+        color: #fff;
+        border-bottom-right-radius: 4px;
+      }
+      .ams-msg-meta {
+        font-size: 0.7rem;
+        margin-top: 0.25rem;
+        color: var(--ams-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .ams-msg-meta--mine {
+        justify-content: flex-end;
+      }
+      .ams-quick {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        padding: 0.5rem 1.25rem;
+        flex-shrink: 0;
+      }
+      .ams-quick button {
+        padding: 0.45rem 0.75rem;
+        border-radius: 999px;
+        border: 1px solid var(--ams-border);
+        background: #f8fafc;
+        color: var(--ams-blue);
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .ams-quick button:hover {
+        background: var(--ams-accent-soft);
+        border-color: #bfdbfe;
+      }
+      .ams-compose-wrap {
+        flex-shrink: 0;
+        position: relative;
+        z-index: 3;
+        padding: 0.65rem 1.25rem 0.35rem;
+        border-top: 1px solid var(--ams-border);
+        background: var(--ams-compose-bg, linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.94) 100%));
+        backdrop-filter: blur(10px);
+      }
+      .ams-compose-inner {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        border: 1px solid var(--ams-border);
+        border-radius: 14px;
+        padding: 0.45rem 0.55rem;
+        background: #fff;
+        box-shadow: var(--ams-shadow);
+      }
+      .ams-compose-fields {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        flex: 1;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border: none;
+        background: transparent;
+        font: inherit;
+      }
+      .ams-compose-inner textarea {
+        flex: 1;
+        min-width: 0;
+        border: none;
+        resize: none;
+        min-height: 44px;
+        max-height: 120px;
+        padding: 0.5rem 0.35rem;
+        font: inherit;
+        font-size: 0.95rem;
+        line-height: 1.4;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        caret-color: #0f172a;
+        position: relative;
+        z-index: 2;
+        pointer-events: auto;
+        -webkit-user-select: text;
+        user-select: text;
+      }
+      .ams-compose-inner textarea:focus {
+        outline: none;
+      }
+      .ams-compose-inner textarea::placeholder {
+        color: #94a3b8;
+      }
+      .ams-send {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        flex-shrink: 0;
+        background: var(--ams-blue);
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .ams-send:hover {
+        background: var(--ams-blue-hover);
+      }
+      .ams-send:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .ams-compose-hint {
+        text-align: center;
+        font-size: 0.72rem;
+        color: var(--ams-muted);
+        margin: 0.35rem 0 0.85rem;
+      }
+      .ams-emoji-wrap {
+        position: relative;
+        flex-shrink: 0;
+        align-self: flex-end;
+      }
+      .ams-emoji-panel {
+        position: absolute;
+        right: 0;
+        bottom: calc(100% + 10px);
+        width: min(320px, calc(100vw - 2rem));
+        max-height: min(340px, 52vh);
+        display: flex;
+        flex-direction: column;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        box-shadow: 0 12px 40px rgba(15, 23, 42, 0.14), 0 4px 12px rgba(15, 23, 42, 0.06);
+        z-index: 80;
+        overflow: hidden;
+        animation: ams-emoji-in 0.18s ease-out;
+      }
+      @keyframes ams-emoji-in {
+        from {
+          opacity: 0;
+          transform: translateY(6px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .ams-emoji-panel[hidden] {
+        display: none !important;
+      }
+      .ams-emoji-panel-head {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.65rem 0.65rem 0.5rem;
+        border-bottom: 1px solid #f1f5f9;
+        background: linear-gradient(180deg, #fafbfc 0%, #fff 100%);
+      }
+      .ams-emoji-search {
+        flex: 1;
+        min-width: 0;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.45rem 0.65rem;
+        font-size: 0.85rem;
+        background: #fff;
+        color: #0f172a;
+      }
+      .ams-emoji-search:focus {
+        outline: none;
+        border-color: #93c5fd;
+        box-shadow: 0 0 0 3px var(--ams-focus-glow);
+      }
+      .ams-emoji-search::placeholder {
+        color: #94a3b8;
+      }
+      .ams-emoji-close {
+        width: 34px;
+        height: 34px;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        color: #64748b;
+        font-size: 1.35rem;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .ams-emoji-close:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+      }
+      .ams-emoji-tabs {
+        display: flex;
+        gap: 0.15rem;
+        padding: 0.35rem 0.5rem 0;
+        border-bottom: 1px solid #f1f5f9;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .ams-emoji-tabs::-webkit-scrollbar {
+        display: none;
+      }
+      .ams-emoji-tab {
+        flex-shrink: 0;
+        padding: 0.35rem 0.65rem;
+        border: none;
+        border-radius: 8px 8px 0 0;
+        background: transparent;
+        color: #64748b;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .ams-emoji-tab:hover {
+        color: #334155;
+        background: #f8fafc;
+      }
+      .ams-emoji-tab.is-active {
+        color: var(--ams-blue);
+        background: var(--ams-accent-soft);
+        box-shadow: inset 0 -2px 0 var(--ams-blue);
+      }
+      .ams-emoji-scroll {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 0.55rem 0.6rem 0.75rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      .ams-emoji-grid {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 2px;
+      }
+      @media (max-width: 380px) {
+        .ams-emoji-grid {
+          grid-template-columns: repeat(7, 1fr);
+        }
+      }
+      .ams-emoji-cell {
+        aspect-ratio: 1;
+        max-height: 2.5rem;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        font-size: 1.35rem;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.12s ease, transform 0.12s ease;
+      }
+      .ams-emoji-cell:hover {
+        background: #f1f5f9;
+        transform: scale(1.08);
+      }
+      .ams-emoji-cell:active {
+        transform: scale(0.95);
+      }
+      .ams-emoji-empty {
+        text-align: center;
+        padding: 1.25rem 0.5rem;
+        font-size: 0.82rem;
+        color: #94a3b8;
+      }
+      .ams-bubble-text {
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .ams-atch {
+        margin-top: 0.45rem;
+        padding-top: 0.45rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.45);
+      }
+      .ams-bubble--mine .ams-atch {
+        border-top-color: rgba(255, 255, 255, 0.35);
+      }
+      .ams-atch-preview {
+        min-height: 2.5rem;
+        border-radius: 10px;
+        overflow: hidden;
+        background: rgba(248, 250, 252, 0.9);
+      }
+      .ams-bubble--mine .ams-atch-preview {
+        background: rgba(255, 255, 255, 0.15);
+      }
+      .ams-atch-thumb {
+        display: block;
+        max-width: 100%;
+        max-height: 220px;
+        width: auto;
+        height: auto;
+        margin: 0 auto;
+      }
+      .ams-atch-actions {
+        margin-top: 0.35rem;
+        font-size: 0.8rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem 0.65rem;
+      }
+      .ams-atch-open {
+        color: var(--ams-blue);
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .ams-atch-open:hover {
+        text-decoration: underline;
+      }
+      .ams-bubble--mine .ams-atch-open {
+        color: #fff;
+      }
+      .ams-atch-meta {
+        color: var(--ams-muted);
+        font-size: 0.75rem;
+      }
+      .ams-bubble--mine .ams-atch-meta {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .ams-login-banner {
+        padding: 1rem;
+        text-align: center;
+        color: var(--ams-muted);
+      }
+      .ams-login-banner a {
+        color: var(--ams-blue);
+        font-weight: 600;
+      }
+      @media (max-width: 768px) {
+        .artisan-messenger {
+          flex-direction: column;
+          min-height: 0;
+        }
+        .artisan-messenger__sidebar {
+          width: 100%;
+          height: auto;
+          max-height: 42vh;
+          min-height: 0;
+          flex-shrink: 0;
+          border-right: none;
+          border-bottom: 1px solid var(--ams-border);
+        }
+        .artisan-messenger__main {
+          flex: 1;
+          min-height: 0;
+          overflow: hidden;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="artisan-messenger" id="artisan-messenger">
+      <aside class="artisan-messenger__sidebar" aria-label="Conversations">
+        <div class="ams-sidebar-head">
+          <button type="button" class="ams-icon-btn ams-sidebar-back" id="ams-btn-back" title="Back" aria-label="Go back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <h1>Messages</h1>
+        </div>
+        <div class="ams-search-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
+          </svg>
+          <input type="search" class="ams-search" id="ams-search" placeholder="Search conversations…" autocomplete="off" />
+        </div>
+        <div class="ams-tabs" role="tablist">
+          <button type="button" class="ams-tab is-active" data-tab="all" role="tab" aria-selected="true">All</button>
+          <button type="button" class="ams-tab" data-tab="unread" role="tab" aria-selected="false">Unread</button>
+          <button type="button" class="ams-tab" data-tab="archived" role="tab" aria-selected="false">Archived</button>
+        </div>
+        <div class="ams-list" id="ams-list" aria-live="polite"></div>
+      </aside>
+
+      <section class="artisan-messenger__main">
+        <div class="ams-login-banner" id="ams-login" hidden>
+          Please <a href="login.html">log in</a> to use messages.
+        </div>
+        <div class="ams-empty" id="ams-empty">Select a conversation</div>
+        <div class="ams-thread" id="ams-thread" hidden>
+          <header class="ams-thread-head">
+            <div class="ams-thread-head-main">
+              <div class="ams-avatar ams-avatar--sm" id="ams-head-avatar" aria-hidden="true">?</div>
+              <div class="ams-thread-head-text">
+                <h2 id="ams-head-name">—</h2>
+                <p class="ams-thread-status"><span class="dot" aria-hidden="true">●</span> Active now · Local Pro</p>
+              </div>
+            </div>
+            <div class="ams-thread-actions">
+              <div class="ams-theme-wrap">
+                <button
+                  type="button"
+                  class="ams-icon-btn"
+                  id="ams-btn-theme"
+                  title="Appearance & colors"
+                  aria-label="Chat appearance and colors"
+                  aria-haspopup="dialog"
+                  aria-expanded="false"
+                  aria-controls="ams-theme-panel"
+                >
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3.5" y="3.5" width="7" height="7" rx="1.75" />
+                    <rect x="13.5" y="3.5" width="7" height="7" rx="1.75" />
+                    <rect x="3.5" y="13.5" width="7" height="7" rx="1.75" />
+                    <rect x="13.5" y="13.5" width="7" height="7" rx="1.75" />
+                  </svg>
+                </button>
+                <div class="ams-theme-panel" id="ams-theme-panel" hidden role="dialog" aria-labelledby="ams-theme-panel-title">
+                  <div class="ams-theme-panel-head">
+                    <strong id="ams-theme-panel-title">Appearance</strong>
+                    <span>Accent &amp; atmosphere</span>
+                  </div>
+                  <div class="ams-theme-scroll">
+                    <div class="ams-theme-grid" id="ams-theme-grid"></div>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="ams-icon-btn" id="ams-btn-archive" title="Archive conversation" aria-label="Archive or more options">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+                  <circle cx="12" cy="5" r="1.35" />
+                  <circle cx="12" cy="12" r="1.35" />
+                  <circle cx="12" cy="19" r="1.35" />
+                </svg>
+              </button>
+            </div>
+          </header>
+          <div class="ams-thread-msgs" id="ams-msgs"></div>
+          <div class="ams-quick" id="ams-quick">
+            <button type="button" class="ams-chip" data-chip="Yes, 10 AM works perfect.">Yes, 10 AM works perfect.</button>
+            <button type="button" class="ams-chip" data-chip="Can we do 11 AM instead?">Can we do 11 AM instead?</button>
+            <button type="button" class="ams-chip" data-chip="I need to reschedule.">I need to reschedule.</button>
+          </div>
+          <div class="ams-compose-wrap">
+            <input
+              type="file"
+              id="ams-file"
+              hidden
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.json,.xml,.svg,.webp,.heic"
+            />
+            <div class="ams-compose-inner">
+              <form class="ams-compose-fields" id="ams-form">
+              <button type="button" class="ams-icon-btn" id="ams-btn-attach" title="Attach image or file" aria-label="Attach file">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path
+                    d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19A4 4 0 0112 5v0a4 4 0 014.95 4.95l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"
+                  />
+                </svg>
+              </button>
+              <textarea id="ams-input" placeholder="Type your message…" rows="1" aria-label="Message"></textarea>
+              </form>
+              <div class="ams-emoji-wrap">
+                <button
+                  type="button"
+                  class="ams-icon-btn"
+                  id="ams-btn-emoji"
+                  title="Emoji"
+                  aria-label="Insert emoji"
+                  aria-haspopup="dialog"
+                  aria-expanded="false"
+                  aria-controls="ams-emoji-panel"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" />
+                  </svg>
+                </button>
+                <div class="ams-emoji-panel" id="ams-emoji-panel" hidden role="dialog" aria-label="Emoji picker">
+                  <div class="ams-emoji-panel-head">
+                    <input
+                      type="search"
+                      class="ams-emoji-search"
+                      id="ams-emoji-search"
+                      placeholder="Search…"
+                      autocomplete="off"
+                      aria-label="Search emoji"
+                    />
+                    <button type="button" class="ams-emoji-close" id="ams-emoji-close" aria-label="Close emoji picker">
+                      ×
+                    </button>
+                  </div>
+                  <div class="ams-emoji-tabs" id="ams-emoji-tabs" role="tablist" aria-label="Emoji categories"></div>
+                  <div class="ams-emoji-scroll" id="ams-emoji-scroll">
+                    <div class="ams-emoji-grid" id="ams-emoji-grid"></div>
+                    <p class="ams-emoji-empty" id="ams-emoji-empty" hidden>No matches.</p>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="ams-send" aria-label="Send message" id="ams-send" form="ams-form">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                </svg>
+              </button>
+            </div>
+            <p class="ams-compose-hint">Press <strong>Enter</strong> to send, <strong>Shift + Enter</strong> for new line</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script src="js/api-config.js"></script>
+    <script src="js/artisan-api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@8.0.7/dist/browser/signalr.min.js"></script>
+    <script src="js/app.js" defer></script>
+    <script>
+      (function () {
+        var ARCHIVE_KEY = "artisan_chat_archived_ids";
+        var CHAT_THEME_STORAGE = "artisan_chat_theme_v1";
+        var CHAT_THEMES = [
+          {
+            id: "ocean",
+            label: "Ocean",
+            vars: {
+              "--ams-blue": "#2563eb",
+              "--ams-blue-hover": "#1d4ed8",
+              "--ams-bg": "linear-gradient(165deg, #f0f7ff 0%, #f8fafc 38%, #ffffff 100%)",
+              "--ams-avatar-from": "#3b82f6",
+              "--ams-avatar-to": "#6366f1",
+              "--ams-accent-soft": "#eff6ff",
+              "--ams-focus-ring": "rgba(37, 99, 235, 0.28)",
+              "--ams-focus-glow": "rgba(37, 99, 235, 0.14)",
+              "--ams-main-bg": "linear-gradient(180deg, #e9f1ff 0%, #f0f4f8 36%, #f4f6f9 70%, #f7f9fb 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(248,250,252,0.9) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(251,253,255,0.95) 100%)",
+            },
+          },
+          {
+            id: "teal",
+            label: "Teal",
+            vars: {
+              "--ams-blue": "#0d9488",
+              "--ams-blue-hover": "#0f766e",
+              "--ams-bg": "linear-gradient(165deg, #ecfdf5 0%, #f8fafc 40%, #ffffff 100%)",
+              "--ams-avatar-from": "#14b8a6",
+              "--ams-avatar-to": "#0d9488",
+              "--ams-accent-soft": "#ecfdf5",
+              "--ams-focus-ring": "rgba(13, 148, 136, 0.3)",
+              "--ams-focus-glow": "rgba(13, 148, 136, 0.15)",
+              "--ams-main-bg": "linear-gradient(180deg, #e5f9f4 0%, #f0f5f4 40%, #f3f6f5 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(245,250,249,0.92) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,255,255,0.52) 0%, rgba(247,252,251,0.96) 100%)",
+            },
+          },
+          {
+            id: "emerald",
+            label: "Emerald",
+            vars: {
+              "--ams-blue": "#059669",
+              "--ams-blue-hover": "#047857",
+              "--ams-bg": "linear-gradient(165deg, #ecfdf5 0%, #f8fafc 40%, #ffffff 100%)",
+              "--ams-avatar-from": "#10b981",
+              "--ams-avatar-to": "#059669",
+              "--ams-accent-soft": "#ecfdf5",
+              "--ams-focus-ring": "rgba(5, 150, 105, 0.28)",
+              "--ams-focus-glow": "rgba(5, 150, 105, 0.14)",
+              "--ams-main-bg": "linear-gradient(180deg, #e6f8f0 0%, #f0f5f2 40%, #f3f6f4 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(245,250,247,0.92) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,255,255,0.52) 0%, rgba(246,252,248,0.96) 100%)",
+            },
+          },
+          {
+            id: "forest",
+            label: "Forest",
+            vars: {
+              "--ams-blue": "#166534",
+              "--ams-blue-hover": "#14532d",
+              "--ams-bg": "linear-gradient(165deg, #f0fdf4 0%, #f8fafc 40%, #ffffff 100%)",
+              "--ams-avatar-from": "#22c55e",
+              "--ams-avatar-to": "#166534",
+              "--ams-accent-soft": "#f0fdf4",
+              "--ams-focus-ring": "rgba(22, 101, 52, 0.28)",
+              "--ams-focus-glow": "rgba(22, 101, 52, 0.12)",
+              "--ams-main-bg": "linear-gradient(180deg, #eaf6ee 0%, #f0f4f1 42%, #f2f5f3 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(245,250,246,0.92) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,255,255,0.52) 0%, rgba(247,252,248,0.96) 100%)",
+            },
+          },
+          {
+            id: "indigo",
+            label: "Indigo",
+            vars: {
+              "--ams-blue": "#4f46e5",
+              "--ams-blue-hover": "#4338ca",
+              "--ams-bg": "linear-gradient(165deg, #eef2ff 0%, #f8fafc 40%, #ffffff 100%)",
+              "--ams-avatar-from": "#6366f1",
+              "--ams-avatar-to": "#4f46e5",
+              "--ams-accent-soft": "#eef2ff",
+              "--ams-focus-ring": "rgba(79, 70, 229, 0.28)",
+              "--ams-focus-glow": "rgba(79, 70, 229, 0.14)",
+              "--ams-main-bg": "linear-gradient(180deg, #ecefff 0%, #f1f3fa 40%, #f4f6f9 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(246,247,254,0.92) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,255,255,0.52) 0%, rgba(248,249,255,0.96) 100%)",
+            },
+          },
+          {
+            id: "violet",
+            label: "Violet",
+            vars: {
+              "--ams-blue": "#7c3aed",
+              "--ams-blue-hover": "#6d28d9",
+              "--ams-bg": "linear-gradient(165deg, #f5f3ff 0%, #fafafa 40%, #ffffff 100%)",
+              "--ams-avatar-from": "#8b5cf6",
+              "--ams-avatar-to": "#7c3aed",
+              "--ams-accent-soft": "#f5f3ff",
+              "--ams-focus-ring": "rgba(124, 58, 237, 0.28)",
+              "--ams-focus-glow": "rgba(124, 58, 237, 0.14)",
+              "--ams-main-bg": "linear-gradient(180deg, #f3effc 0%, #f5f4f9 40%, #f7f6fa 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(249,247,255,0.92) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,255,255,0.52) 0%, rgba(251,248,255,0.96) 100%)",
+            },
+          },
+          {
+            id: "fuchsia",
+            label: "Fuchsia",
+            vars: {
+              "--ams-blue": "#c026d3",
+              "--ams-blue-hover": "#a21caf",
+              "--ams-bg": "linear-gradient(165deg, #fdf4ff 0%, #f8fafc 40%, #ffffff 100%)",
+              "--ams-avatar-from": "#d946ef",
+              "--ams-avatar-to": "#c026d3",
+              "--ams-accent-soft": "#fdf4ff",
+              "--ams-focus-ring": "rgba(192, 38, 211, 0.28)",
+              "--ams-focus-glow": "rgba(192, 38, 211, 0.14)",
+              "--ams-main-bg": "linear-gradient(180deg, #fbf0fb 0%, #f6f4f7 40%, #f5f3f6 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(253,244,255,0.9) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,250,255,0.55) 0%, rgba(255,252,255,0.96) 100%)",
+            },
+          },
+          {
+            id: "rose",
+            label: "Rose",
+            vars: {
+              "--ams-blue": "#e11d48",
+              "--ams-blue-hover": "#be123c",
+              "--ams-bg": "linear-gradient(165deg, #fff1f2 0%, #f8fafc 40%, #ffffff 100%)",
+              "--ams-avatar-from": "#fb7185",
+              "--ams-avatar-to": "#e11d48",
+              "--ams-accent-soft": "#fff1f2",
+              "--ams-focus-ring": "rgba(225, 29, 72, 0.28)",
+              "--ams-focus-glow": "rgba(225, 29, 72, 0.14)",
+              "--ams-main-bg": "linear-gradient(180deg, #fff1f4 0%, #f7f2f5 40%, #f3eff2 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,253,254,0.98) 0%, rgba(255,245,248,0.9) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,250,252,0.55) 0%, rgba(255,252,253,0.96) 100%)",
+            },
+          },
+          {
+            id: "crimson",
+            label: "Crimson",
+            vars: {
+              "--ams-blue": "#dc2626",
+              "--ams-blue-hover": "#b91c1c",
+              "--ams-bg": "linear-gradient(165deg, #fef2f2 0%, #f8fafc 40%, #ffffff 100%)",
+              "--ams-avatar-from": "#ef4444",
+              "--ams-avatar-to": "#dc2626",
+              "--ams-accent-soft": "#fef2f2",
+              "--ams-focus-ring": "rgba(220, 38, 38, 0.28)",
+              "--ams-focus-glow": "rgba(220, 38, 38, 0.14)",
+              "--ams-main-bg": "linear-gradient(165deg, #fdf1f1 0%, #f4eaea 36%, #ebe3e4 70%, #e5dedf 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,252,252,0.98) 0%, rgba(255,245,245,0.9) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,248,248,0.58) 0%, rgba(255,251,251,0.96) 100%)",
+            },
+          },
+          {
+            id: "sky",
+            label: "Sky",
+            vars: {
+              "--ams-blue": "#0284c7",
+              "--ams-blue-hover": "#0369a1",
+              "--ams-bg": "linear-gradient(165deg, #f0f9ff 0%, #f8fafc 40%, #ffffff 100%)",
+              "--ams-avatar-from": "#0ea5e9",
+              "--ams-avatar-to": "#0284c7",
+              "--ams-accent-soft": "#e0f2fe",
+              "--ams-focus-ring": "rgba(2, 132, 199, 0.28)",
+              "--ams-focus-glow": "rgba(2, 132, 199, 0.14)",
+              "--ams-main-bg": "linear-gradient(180deg, #e5f4fc 0%, #f0f6fa 40%, #f3f7fb 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(240,249,255,0.92) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,255,255,0.52) 0%, rgba(241,250,255,0.96) 100%)",
+            },
+          },
+          {
+            id: "cyan",
+            label: "Cyan",
+            vars: {
+              "--ams-blue": "#0891b2",
+              "--ams-blue-hover": "#0e7490",
+              "--ams-bg": "linear-gradient(165deg, #ecfeff 0%, #f8fafc 40%, #ffffff 100%)",
+              "--ams-avatar-from": "#22d3ee",
+              "--ams-avatar-to": "#0891b2",
+              "--ams-accent-soft": "#ecfeff",
+              "--ams-focus-ring": "rgba(8, 145, 178, 0.28)",
+              "--ams-focus-glow": "rgba(8, 145, 178, 0.14)",
+              "--ams-main-bg": "linear-gradient(180deg, #e3f8fc 0%, #eef6f8 42%, #f1f7f8 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(236,254,255,0.9) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,255,255,0.52) 0%, rgba(240,253,255,0.96) 100%)",
+            },
+          },
+          {
+            id: "amber",
+            label: "Amber",
+            vars: {
+              "--ams-blue": "#d97706",
+              "--ams-blue-hover": "#b45309",
+              "--ams-bg": "linear-gradient(165deg, #fffbeb 0%, #fafaf9 40%, #ffffff 100%)",
+              "--ams-avatar-from": "#fbbf24",
+              "--ams-avatar-to": "#d97706",
+              "--ams-accent-soft": "#fffbeb",
+              "--ams-focus-ring": "rgba(217, 119, 6, 0.32)",
+              "--ams-focus-glow": "rgba(217, 119, 6, 0.16)",
+              "--ams-main-bg": "linear-gradient(180deg, #fff6e8 0%, #f7f4f0 42%, #f4f2ef 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,253,248,0.98) 0%, rgba(255,251,235,0.92) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,252,245,0.58) 0%, rgba(255,253,248,0.96) 100%)",
+            },
+          },
+          {
+            id: "slate",
+            label: "Slate",
+            vars: {
+              "--ams-blue": "#475569",
+              "--ams-blue-hover": "#334155",
+              "--ams-bg": "linear-gradient(165deg, #f1f5f9 0%, #f8fafc 42%, #ffffff 100%)",
+              "--ams-avatar-from": "#64748b",
+              "--ams-avatar-to": "#475569",
+              "--ams-accent-soft": "#f1f5f9",
+              "--ams-focus-ring": "rgba(71, 85, 105, 0.35)",
+              "--ams-focus-glow": "rgba(71, 85, 105, 0.14)",
+              "--ams-main-bg": "linear-gradient(180deg, #e9edf2 0%, #f0f2f5 44%, #f3f5f7 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,250,252,0.94) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(248,250,252,0.96) 100%)",
+            },
+          },
+          {
+            id: "midnight",
+            label: "Midnight",
+            vars: {
+              "--ams-blue": "#1e3a8a",
+              "--ams-blue-hover": "#1e40af",
+              "--ams-bg": "linear-gradient(165deg, #eff6ff 0%, #f1f5f9 45%, #ffffff 100%)",
+              "--ams-avatar-from": "#3b82f6",
+              "--ams-avatar-to": "#1e3a8a",
+              "--ams-accent-soft": "#eff6ff",
+              "--ams-focus-ring": "rgba(30, 58, 138, 0.35)",
+              "--ams-focus-glow": "rgba(30, 58, 138, 0.14)",
+              "--ams-main-bg": "linear-gradient(180deg, #e6eef9 0%, #eef1f6 42%, #f1f3f7 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(239,246,255,0.93) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,255,255,0.52) 0%, rgba(241,248,255,0.96) 100%)",
+            },
+          },
+          {
+            id: "copper",
+            label: "Copper",
+            vars: {
+              "--ams-blue": "#b45309",
+              "--ams-blue-hover": "#92400e",
+              "--ams-bg": "linear-gradient(165deg, #fff7ed 0%, #fafaf9 40%, #ffffff 100%)",
+              "--ams-avatar-from": "#ea580c",
+              "--ams-avatar-to": "#b45309",
+              "--ams-accent-soft": "#fff7ed",
+              "--ams-focus-ring": "rgba(180, 83, 9, 0.32)",
+              "--ams-focus-glow": "rgba(180, 83, 9, 0.14)",
+              "--ams-main-bg": "linear-gradient(180deg, #fdf3ea 0%, #f5f1ec 42%, #f2eeea 100%)",
+              "--ams-head-bg": "linear-gradient(180deg, rgba(255,253,248,0.98) 0%, rgba(255,247,237,0.92) 100%)",
+              "--ams-compose-bg": "linear-gradient(180deg, rgba(255,251,245,0.58) 0%, rgba(255,252,248,0.96) 100%)",
+            },
+          },
+        ];
+
+        var currentChatThemeId = "ocean";
+
+        function readSavedChatThemeId() {
+          try {
+            var raw = localStorage.getItem(CHAT_THEME_STORAGE);
+            if (!raw) return "ocean";
+            for (var i = 0; i < CHAT_THEMES.length; i++) {
+              if (CHAT_THEMES[i].id === raw) return raw;
+            }
+          } catch (e) {}
+          return "ocean";
+        }
+
+        function applyChatTheme(id) {
+          var preset = CHAT_THEMES[0];
+          for (var i = 0; i < CHAT_THEMES.length; i++) {
+            if (CHAT_THEMES[i].id === id) {
+              preset = CHAT_THEMES[i];
+              break;
+            }
+          }
+          currentChatThemeId = preset.id;
+          var root = document.getElementById("artisan-messenger");
+          if (root) {
+            Object.keys(preset.vars).forEach(function (key) {
+              root.style.setProperty(key, preset.vars[key]);
+            });
+            root.setAttribute("data-chat-theme", preset.id);
+          }
+          try {
+            localStorage.setItem(CHAT_THEME_STORAGE, preset.id);
+          } catch (e) {}
+          document.querySelectorAll(".ams-theme-opt").forEach(function (btn) {
+            btn.classList.toggle("is-current", btn.getAttribute("data-theme-id") === preset.id);
+          });
+        }
+
+        applyChatTheme(readSavedChatThemeId());
+
+        var listEl = document.getElementById("ams-list");
+        var emptyEl = document.getElementById("ams-empty");
+        var threadEl = document.getElementById("ams-thread");
+        var msgsEl = document.getElementById("ams-msgs");
+        var inputEl = document.getElementById("ams-input");
+        var formEl = document.getElementById("ams-form");
+        var searchEl = document.getElementById("ams-search");
+        var loginEl = document.getElementById("ams-login");
+        var headName = document.getElementById("ams-head-name");
+        var headAvatar = document.getElementById("ams-head-avatar");
+        var btnArchive = document.getElementById("ams-btn-archive");
+        var btnAttach = document.getElementById("ams-btn-attach");
+        var fileInput = document.getElementById("ams-file");
+
+        var state = {
+          partners: [],
+          activeId: "",
+          tab: "all",
+          loading: false,
+          attachUploading: false,
+          hub: null,
+        };
+
+        function esc(s) {
+          return String(s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+        }
+
+        function initials(name) {
+          var p = (name || "").trim().split(/\s+/).filter(Boolean);
+          if (!p.length) return "?";
+          if (p.length === 1) return p[0].charAt(0).toUpperCase();
+          return (p[0].charAt(0) + p[p.length - 1].charAt(0)).toUpperCase();
+        }
+
+        function myInitials() {
+          try {
+            var u = window.ArtisanAuth && ArtisanAuth.getStoredUser && ArtisanAuth.getStoredUser();
+            return initials((u && u.fullName) || (u && u.email) || "You");
+          } catch (e) {
+            return "Y";
+          }
+        }
+
+        function getMyUserId() {
+          var t = window.ArtisanAuth && ArtisanAuth.getAccessToken && ArtisanAuth.getAccessToken();
+          if (!t) return null;
+          try {
+            var parts = t.split(".");
+            if (parts.length < 2) return null;
+            var b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+            while (b64.length % 4) b64 += "=";
+            var json = JSON.parse(atob(b64));
+            return json.sub || json.nameid || null;
+          } catch (e) {
+            return null;
+          }
+        }
+
+        function hubApiBase() {
+          var raw =
+            (window.ArtisanAuth && typeof ArtisanAuth.baseUrl === "function" && ArtisanAuth.baseUrl()) ||
+            window.ARTISAN_API_BASE ||
+            "http://localhost:5172";
+          raw = String(raw || "").trim().replace(/\/$/, "");
+          if (!/^https?:\/\//i.test(raw)) raw = "http://localhost:5172";
+          return raw;
+        }
+
+        function buildHubConnection() {
+          var base = hubApiBase();
+          var c = new signalR.HubConnectionBuilder()
+            .withUrl(base + "/hubs/chat", {
+              accessTokenFactory: function () {
+                return (window.ArtisanAuth && ArtisanAuth.getAccessToken && ArtisanAuth.getAccessToken()) || "";
+              },
+              transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling,
+            })
+            .withAutomaticReconnect([0, 2000, 5000, 10000])
+            .build();
+          c.on("ReceiveMessage", function (payload) {
+            if (!payload || !state.activeId) return;
+            var myId = getMyUserId();
+            if (!myId) return;
+            var sid = String(payload.senderUserId || "");
+            var rid = String(payload.recipientUserId || "");
+            var aid = String(state.activeId);
+            var inThread =
+              (sid === aid && rid === myId) || (sid === myId && rid === aid);
+            if (inThread) loadMessages(state.activeId);
+            loadInbox({ preserveActive: true });
+          });
+          c.on("BookingResponse", function (payload) {
+            try {
+              window.dispatchEvent(new CustomEvent("artisan-booking-response", { detail: payload || null }));
+            } catch (eBr) {}
+          });
+          return c;
+        }
+
+        function ensureHub() {
+          if (typeof signalR === "undefined" || !window.ArtisanAuth || !ArtisanAuth.getAccessToken()) {
+            return Promise.resolve(null);
+          }
+          if (!state.hub) state.hub = buildHubConnection();
+          var h = state.hub;
+          if (h.state === signalR.HubConnectionState.Connected) return Promise.resolve(h);
+          return h
+            .start()
+            .then(function () {
+              return h;
+            })
+            .catch(function (e) {
+              state.hub = null;
+              throw e;
+            });
+        }
+
+        function readArchived() {
+          try {
+            var raw = sessionStorage.getItem(ARCHIVE_KEY);
+            var arr = raw ? JSON.parse(raw) : [];
+            return Array.isArray(arr) ? arr.map(String) : [];
+          } catch (e) {
+            return [];
+          }
+        }
+
+        function writeArchived(ids) {
+          try {
+            sessionStorage.setItem(ARCHIVE_KEY, JSON.stringify(ids));
+          } catch (e) {}
+        }
+
+        function getPartnerFromUrl() {
+          try {
+            return (new URLSearchParams(window.location.search).get("partner") || "").trim();
+          } catch (e) {
+            return "";
+          }
+        }
+
+        function formatListTime(iso) {
+          if (!iso) return "";
+          var d = new Date(iso);
+          if (isNaN(d.getTime())) return "";
+          var now = new Date();
+          var startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          if (d >= startToday) {
+            return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+          }
+          var startYest = new Date(startToday);
+          startYest.setDate(startYest.getDate() - 1);
+          if (d >= startYest && d < startToday) return "Yesterday";
+          return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        }
+
+        function formatDatePill(iso) {
+          var d = new Date(iso);
+          if (isNaN(d.getTime())) return "";
+          var now = new Date();
+          var startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          if (d >= startToday) {
+            return "Today, " + d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+          }
+          var startYest = new Date(startToday);
+          startYest.setDate(startYest.getDate() - 1);
+          if (d >= startYest && d < startToday) return "Yesterday";
+          return d.toLocaleDateString(undefined, {
+            weekday: "long",
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          });
+        }
+
+        function filteredPartners() {
+          var archived = readArchived();
+          var q = (searchEl && searchEl.value ? searchEl.value : "").toLowerCase().trim();
+          var rows = state.partners.filter(function (p) {
+            var id = String(p.userId);
+            var inArchived = archived.indexOf(id) !== -1;
+            if (state.tab === "archived") return inArchived;
+            if (inArchived) return false;
+            if (state.tab === "unread" && !(p.unreadCount > 0)) return false;
+            if (q) {
+              var blob = ((p.displayName || "") + " " + (p.lastMessagePreview || "")).toLowerCase();
+              if (blob.indexOf(q) === -1) return false;
+            }
+            return true;
+          });
+          // Keep active thread visible in "All" only; Unread/Archived lists must be strict.
+          if (state.tab === "all" && state.activeId) {
+            var aid = String(state.activeId);
+            if (!rows.some(function (p) { return String(p.userId) === aid; })) {
+              var pActive = state.partners.find(function (p) {
+                return String(p.userId) === aid;
+              });
+              if (pActive) rows = [pActive].concat(rows);
+            }
+          }
+          return rows;
+        }
+
+        function renderList() {
+          if (!listEl) return;
+          var rows = filteredPartners();
+          if (!rows.length) {
+            listEl.innerHTML =
+              "<p style='padding:1rem;color:#64748b;font-size:0.9rem;margin:0'>" +
+              (state.tab === "archived"
+                ? "No archived conversations."
+                : state.tab === "unread"
+                  ? "No unread messages."
+                  : "No conversations yet.") +
+              "</p>";
+            return;
+          }
+          listEl.innerHTML = rows
+            .map(function (p) {
+              var active = String(p.userId) === String(state.activeId);
+              var unread = p.unreadCount > 0;
+              var online = false;
+              try {
+                var lm = new Date(p.lastMessageAt);
+                online = !isNaN(lm.getTime()) && Date.now() - lm.getTime() < 15 * 60 * 1000;
+              } catch (e) {}
+              return (
+                "<button type='button' class='ams-convo" +
+                (active ? " is-active" : "") +
+                "' data-id='" +
+                esc(String(p.userId)) +
+                "'>" +
+                "<span class='ams-avatar'>" +
+                esc(initials(p.displayName)) +
+                (online ? "<span class='ams-online' aria-label='Online'></span>" : "") +
+                "</span>" +
+                "<span class='ams-convo-body'>" +
+                "<span class='ams-convo-top'><span class='ams-convo-name'>" +
+                esc(p.displayName || "User") +
+                (unread ? " <span class='ams-unread-dot' aria-label='Unread'>●</span>" : "") +
+                "</span><span class='ams-convo-time'>" +
+                esc(formatListTime(p.lastMessageAt)) +
+                "</span></span>" +
+                "<span class='ams-convo-preview'>" +
+                esc(p.lastMessagePreview || "") +
+                "</span></span></button>"
+              );
+            })
+            .join("");
+        }
+
+        function setActiveInUrl(id) {
+          try {
+            var u = new URL(window.location.href);
+            if (id) u.searchParams.set("partner", id);
+            else u.searchParams.delete("partner");
+            window.history.replaceState({}, "", u.pathname + (u.search || ""));
+          } catch (e) {}
+        }
+
+        function showThread(show) {
+          if (emptyEl) {
+            emptyEl.hidden = show;
+            emptyEl.style.display = show ? "none" : "";
+          }
+          if (threadEl) {
+            threadEl.hidden = !show;
+            threadEl.style.display = !show ? "none" : "";
+          }
+        }
+
+        function activatePartner(id, displayName) {
+          state.activeId = id;
+          if (headName) headName.textContent = displayName || "User";
+          if (headAvatar) headAvatar.textContent = initials(displayName || "User");
+          setActiveInUrl(id);
+          renderList();
+          showThread(!!id);
+          if (id) {
+            loadMessages(id);
+            ensureHub().catch(function () {});
+          } else if (msgsEl) msgsEl.innerHTML = "";
+        }
+
+        function formatBytes(n) {
+          n = Number(n) || 0;
+          if (n < 1024) return n + " B";
+          if (n < 1048576) return (n / 1024).toFixed(1) + " KB";
+          return (n / 1048576).toFixed(1) + " MB";
+        }
+
+        function hydrateAttachments() {
+          if (!msgsEl || !window.ArtisanAuth || !ArtisanAuth.getAccessToken) return;
+          var token = ArtisanAuth.getAccessToken();
+          if (!token) return;
+          var base = hubApiBase();
+          msgsEl.querySelectorAll("[data-ams-atch-mid]").forEach(function (el) {
+            var id = el.getAttribute("data-ams-atch-mid");
+            if (!id || el.getAttribute("data-ams-loaded") === "1") return;
+            el.setAttribute("data-ams-loaded", "1");
+            var ct = el.getAttribute("data-ct") || "";
+            var url = base + "/api/me/chats/attachments/" + encodeURIComponent(id);
+            fetch(url, { headers: { Authorization: "Bearer " + token } })
+              .then(function (r) {
+                if (!r.ok) throw new Error("bad");
+                return r.blob();
+              })
+              .then(function (blob) {
+                var u = URL.createObjectURL(blob);
+                el.setAttribute("data-blob-url", u);
+                var prev = el.querySelector(".ams-atch-preview");
+                if (/^image\//i.test(ct) && prev) {
+                  var img = document.createElement("img");
+                  img.className = "ams-atch-thumb";
+                  img.alt = "";
+                  img.src = u;
+                  prev.appendChild(img);
+                } else if (prev) {
+                  prev.innerHTML =
+                    '<span style="padding:0.5rem;display:block;color:#64748b;font-size:0.8rem">File preview not available — use Open below.</span>';
+                }
+                var openLink = el.querySelector(".ams-atch-open");
+                if (openLink) {
+                  openLink.addEventListener("click", function (ev) {
+                    ev.preventDefault();
+                    var fn = openLink.getAttribute("data-fn") || "download";
+                    if (/^image\//i.test(ct) || ct === "application/pdf") {
+                      window.open(u, "_blank", "noopener,noreferrer");
+                      return;
+                    }
+                    var a = document.createElement("a");
+                    a.href = u;
+                    a.download = fn;
+                    a.rel = "noopener";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                  });
+                }
+              })
+              .catch(function () {
+                var prev = el.querySelector(".ams-atch-preview");
+                if (prev) prev.textContent = "Could not load attachment.";
+              });
+          });
+        }
+
+        function sameDay(a, b) {
+          return (
+            a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+          );
+        }
+
+        function renderMessages(rows) {
+          if (!msgsEl) return;
+          if (!rows.length) {
+            msgsEl.innerHTML = "<p style='color:#64748b'>No messages yet.</p>";
+            return;
+          }
+          var html = [];
+          var lastDate = null;
+          var avSpacer = "<span class='ams-av-spacer' aria-hidden='true'></span>";
+          rows.forEach(function (m, i) {
+            var prev = i > 0 ? rows[i - 1] : null;
+            var d = new Date(m.sentAt);
+            if (!lastDate || !sameDay(d, lastDate)) {
+              lastDate = d;
+              html.push(
+                "<div class='ams-date-pill'><span>" + esc(formatDatePill(m.sentAt)) + "</span></div>"
+              );
+            }
+            var mine = !!m.isMine;
+            var showPeerAv = !mine && (!prev || !!prev.isMine);
+            var showMineAv = mine && (!prev || !prev.isMine);
+            var rowClass = mine ? "ams-msg-row ams-msg-row--mine" : "ams-msg-row ams-msg-row--peer";
+            var bubbleClass = mine ? "ams-bubble ams-bubble--mine" : "ams-bubble ams-bubble--peer";
+            var metaClass = mine ? "ams-msg-meta ams-msg-meta--mine" : "ams-msg-meta ams-msg-meta--peer";
+            var time = d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+            var peerAv =
+              "<div class='ams-avatar ams-avatar--sm' aria-hidden='true'>" +
+              esc(initials(headName ? headName.textContent : "")) +
+              "</div>";
+            var mineAv =
+              "<div class='ams-avatar ams-avatar--sm' aria-hidden='true'>" + esc(myInitials()) + "</div>";
+            var bubbleBits = [];
+            if (m.body) {
+              bubbleBits.push("<div class='ams-bubble-text'>" + esc(m.body) + "</div>");
+            }
+            if (m.attachment) {
+              var mid = esc(String(m.id));
+              var fn = esc(String(m.attachment.fileName || "file"));
+              var ct = esc(String(m.attachment.contentType || ""));
+              var ctRaw = String(m.attachment.contentType || "");
+              var isImg = /^image\//i.test(ctRaw);
+              var openLabel = isImg ? "Open image" : "Open / download";
+              bubbleBits.push(
+                "<div class='ams-atch' data-ams-atch-mid='" +
+                  mid +
+                  "' data-ct='" +
+                  ct +
+                  "'><div class='ams-atch-preview'></div><div class='ams-atch-actions'><a href='#' class='ams-atch-open' data-fn='" +
+                  fn +
+                  "'>" +
+                  openLabel +
+                  "</a><span class='ams-atch-meta'>" +
+                  esc(formatBytes(m.attachment.sizeBytes)) +
+                  "</span></div></div>"
+              );
+            }
+            var bubbleContent = bubbleBits.length ? bubbleBits.join("") : "<span class='ams-muted'>—</span>";
+            var inner =
+              "<div><div class='" +
+              bubbleClass +
+              "'>" +
+              bubbleContent +
+              "</div><div class='" +
+              metaClass +
+              "'>" +
+              esc(time) +
+              (mine ? " · Read" : "") +
+              "</div></div>";
+            if (mine) {
+              html.push(
+                "<div class='" +
+                rowClass +
+                "'>" +
+                inner +
+                (showMineAv ? mineAv : avSpacer) +
+                "</div>"
+              );
+            } else {
+              html.push(
+                "<div class='" +
+                rowClass +
+                "'>" +
+                (showPeerAv ? peerAv : avSpacer) +
+                inner +
+                "</div>"
+              );
+            }
+          });
+          msgsEl.innerHTML = html.join("");
+          msgsEl.scrollTop = msgsEl.scrollHeight;
+          hydrateAttachments();
+        }
+
+        function loadMessages(partnerId) {
+          if (!partnerId || !window.ArtisanAuth) return;
+          state.loading = true;
+          ArtisanAuth.apiJson("/api/me/chats/" + encodeURIComponent(partnerId) + "/messages", { method: "GET" }).then(
+            function (res) {
+              state.loading = false;
+              if (!res.ok || !Array.isArray(res.data)) {
+                if (msgsEl) msgsEl.innerHTML = "<p style='color:#dc2626'>Could not load messages.</p>";
+                return;
+              }
+              renderMessages(res.data);
+            }
+          );
+        }
+
+        function loadInbox(options) {
+          options = options || {};
+          if (!window.ArtisanAuth || !ArtisanAuth.getAccessToken || !ArtisanAuth.getAccessToken()) {
+            if (loginEl) loginEl.hidden = false;
+            if (listEl) listEl.innerHTML = "";
+            showThread(false);
+            if (emptyEl) {
+              emptyEl.hidden = true;
+              emptyEl.textContent = "";
+            }
+            return;
+          }
+          if (loginEl) loginEl.hidden = true;
+          ArtisanAuth.apiJson("/api/me/chats", { method: "GET" }).then(function (res) {
+            if (!res.ok || !Array.isArray(res.data)) {
+              state.partners = [];
+              renderList();
+              return;
+            }
+            state.partners = res.data;
+            ensureHub().catch(function () {});
+            if (
+              options.preserveActive &&
+              state.activeId &&
+              state.partners.some(function (p) {
+                return String(p.userId) === String(state.activeId);
+              })
+            ) {
+              renderList();
+              return;
+            }
+            var prefer = getPartnerFromUrl();
+            if (prefer && state.partners.some(function (p) { return String(p.userId) === String(prefer); })) {
+              var pr = state.partners.find(function (p) {
+                return String(p.userId) === String(prefer);
+              });
+              activatePartner(prefer, pr.displayName);
+            } else if (state.partners.length) {
+              var p0 = state.partners[0];
+              activatePartner(p0.userId, p0.displayName);
+            } else {
+              state.activeId = "";
+              renderList();
+              showThread(false);
+              if (emptyEl) emptyEl.hidden = false;
+            }
+          });
+        }
+
+        document.querySelectorAll(".ams-tab").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            state.tab = btn.getAttribute("data-tab") || "all";
+            document.querySelectorAll(".ams-tab").forEach(function (b) {
+              var on = b === btn;
+              b.classList.toggle("is-active", on);
+              b.setAttribute("aria-selected", on ? "true" : "false");
+            });
+            renderList();
+          });
+        });
+
+        var btnBack = document.getElementById("ams-btn-back");
+        if (btnBack) {
+          btnBack.addEventListener("click", function () {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.href = "index.html";
+            }
+          });
+        }
+
+        if (searchEl) {
+          searchEl.addEventListener("input", function () {
+            renderList();
+          });
+        }
+
+        if (listEl) {
+          listEl.addEventListener("click", function (e) {
+            var btn = e.target.closest("button[data-id]");
+            if (!btn) return;
+            var id = btn.getAttribute("data-id");
+            var p = state.partners.find(function (x) {
+              return String(x.userId) === String(id);
+            });
+            activatePartner(id, p ? p.displayName : "");
+          });
+        }
+
+        if (btnArchive) {
+          btnArchive.addEventListener("click", function () {
+            if (!state.activeId) return;
+            var id = String(state.activeId);
+            var ar = readArchived();
+            if (ar.indexOf(id) === -1) {
+              ar.push(id);
+              writeArchived(ar);
+            }
+            state.activeId = "";
+            setActiveInUrl("");
+            showThread(false);
+            if (emptyEl) {
+              emptyEl.hidden = false;
+              emptyEl.textContent = "Select a conversation";
+            }
+            renderList();
+            if (window.ArtisanUI && ArtisanUI.showToast) ArtisanUI.showToast("Conversation archived.", "success");
+          });
+        }
+
+        document.querySelectorAll(".ams-chip").forEach(function (chip) {
+          chip.addEventListener("click", function () {
+            var t = chip.getAttribute("data-chip") || chip.textContent;
+            if (inputEl) {
+              inputEl.value = (inputEl.value ? inputEl.value + " " : "") + t;
+              inputEl.focus();
+            }
+          });
+        });
+
+        if (formEl && inputEl) {
+          inputEl.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              formEl.requestSubmit();
+            }
+          });
+          formEl.addEventListener("submit", function (e) {
+            e.preventDefault();
+            if (typeof window.__amsCloseEmojiPicker === "function") window.__amsCloseEmojiPicker();
+            if (typeof window.__amsCloseThemePanel === "function") window.__amsCloseThemePanel();
+            if (!state.activeId || state.loading || state.attachUploading || !window.ArtisanAuth) return;
+            var body = inputEl.value.trim();
+            if (!body) return;
+            var sendBtn = document.getElementById("ams-send");
+            if (sendBtn) sendBtn.disabled = true;
+            ensureHub()
+              .then(function (hc) {
+                if (!hc) throw new Error("Not connected");
+                return hc.invoke("SendChatMessage", state.activeId, body);
+              })
+              .then(function () {
+                if (sendBtn) sendBtn.disabled = false;
+                if (inputEl) inputEl.value = "";
+                loadMessages(state.activeId);
+                loadInbox({ preserveActive: true });
+              })
+              .catch(function (err) {
+                if (sendBtn) sendBtn.disabled = false;
+                var msg =
+                  err && err.message
+                    ? String(err.message)
+                    : err && typeof err === "string"
+                      ? err
+                      : "Send failed.";
+                if (/negotiate|404|Not Found/i.test(msg)) {
+                  msg +=
+                    " Check that the Artisan API is running on " +
+                    hubApiBase() +
+                    " (restart `dotnet run` after updating the backend).";
+                }
+                if (window.ArtisanUI && typeof ArtisanUI.showToast === "function") {
+                  ArtisanUI.showToast(msg, "error");
+                } else {
+                  console.warn(msg);
+                }
+              });
+          });
+        }
+
+        if (btnAttach && fileInput) {
+          btnAttach.addEventListener("click", function () {
+            if (!state.activeId) {
+              if (window.ArtisanUI && typeof ArtisanUI.showToast === "function") {
+                ArtisanUI.showToast("Select a conversation first.", "info");
+              }
+              return;
+            }
+            fileInput.click();
+          });
+          fileInput.addEventListener("change", function () {
+            var f = fileInput.files && fileInput.files[0];
+            fileInput.value = "";
+            if (!f || !state.activeId || state.attachUploading) return;
+            if (!window.ArtisanAuth || typeof ArtisanAuth.uploadChatAttachment !== "function") return;
+            var cap = inputEl ? inputEl.value.trim() : "";
+            state.attachUploading = true;
+            var sendBtnUp = document.getElementById("ams-send");
+            if (btnAttach) btnAttach.disabled = true;
+            if (sendBtnUp) sendBtnUp.disabled = true;
+            ArtisanAuth.uploadChatAttachment(state.activeId, f, cap).then(function (res) {
+              state.attachUploading = false;
+              if (btnAttach) btnAttach.disabled = false;
+              if (sendBtnUp) sendBtnUp.disabled = false;
+              if (!res.ok) {
+                var err =
+                  (res.data && res.data.error) ||
+                  (res.data && res.data.title) ||
+                  (res.status ? "Upload failed (" + res.status + ")." : "Upload failed.");
+                if (window.ArtisanUI && typeof ArtisanUI.showToast === "function") {
+                  ArtisanUI.showToast(String(err), "error");
+                }
+                return;
+              }
+              if (inputEl) inputEl.value = "";
+              loadMessages(state.activeId);
+              loadInbox({ preserveActive: true });
+            });
+          });
+        }
+
+        var AMS_EMOJI_RECENT_KEY = "artisan_emoji_recent_v1";
+        var AMS_POPULAR = {
+          "👍": 1,
+          "🙏": 1,
+          "😊": 1,
+          "❤️": 1,
+          "✅": 1,
+          "🎉": 1,
+          "👏": 1,
+          "🔥": 1,
+          "💯": 1,
+          "🤝": 1,
+          "😂": 1,
+          "🙌": 1,
+          "⭐": 1,
+          "📌": 1,
+          "⏰": 1,
+          "💼": 1,
+        };
+
+        function amsParseEmojiLines(lines) {
+          var out = [];
+          lines.forEach(function (line) {
+            line = String(line || "").trim();
+            if (!line) return;
+            var parts = line.split("|");
+            if (parts.length < 2) return;
+            var c = parts[0].trim();
+            var k = parts[1].trim().toLowerCase();
+            var t = (parts[2] || "smileys").trim();
+            if (c) out.push({ c: c, k: k, t: t });
+          });
+          return out;
+        }
+
+        var AMS_EMOJI_ITEMS = amsParseEmojiLines([
+          "😀|grin smile happy face|smileys",
+          "😃|smiley big eyes laugh|smileys",
+          "😄|smile open mouth happy|smileys",
+          "😁|grin beam teeth smile|smileys",
+          "😅|sweat smile nervous|smileys",
+          "😂|joy tears laugh funny haha|smileys",
+          "🤣|rofl laugh rolling floor|smileys",
+          "😊|blush smile pleased|smileys",
+          "😇|halo innocent angel|smileys",
+          "🙂|slight smile|smileys",
+          "😉|wink flirt|smileys",
+          "😍|heart eyes love crush|smileys",
+          "🥰|hearts love affection|smileys",
+          "😘|kiss love blow|smileys",
+          "😋|yum tasty tongue|smileys",
+          "😎|cool sunglasses|smileys",
+          "🤩|star eyes wow|smileys",
+          "🥳|party celebrate hat|smileys",
+          "😏|smirk|smileys",
+          "😐|neutral meh|smileys",
+          "😑|expressionless|smileys",
+          "😴|sleep tired zzz|smileys",
+          "🤔|think hmm question|smileys",
+          "🙄|roll eyes sigh|smileys",
+          "😬|grimace awkward|smileys",
+          "😮|open mouth surprised wow|smileys",
+          "😢|tear sad cry|smileys",
+          "😭|sob cry sad tears|smileys",
+          "😤|triumph huff angry|smileys",
+          "😡|rage angry mad|smileys",
+          "🤗|hug hugging|gestures",
+          "🤝|handshake deal agree meeting|gestures",
+          "🙌|celebrate hands hooray|gestures",
+          "👏|clap applause bravo|gestures",
+          "👍|thumbs up ok yes good agree|gestures",
+          "👎|thumbs down no disagree|gestures",
+          "✌️|peace victory v sign|gestures",
+          "🤞|fingers crossed luck hope|gestures",
+          "👋|wave hello hi bye|gestures",
+          "🙏|pray thanks please namaste|gestures",
+          "💪|muscle strong flex|gestures",
+          "✍️|writing pen sign|gestures",
+          "❤️|red heart love|hearts",
+          "🧡|orange heart|hearts",
+          "💛|yellow heart|hearts",
+          "💚|green heart|hearts",
+          "💙|blue heart|hearts",
+          "💜|purple heart|hearts",
+          "🖤|black heart|hearts",
+          "💔|broken heart sad|hearts",
+          "❣️|heart exclamation love|hearts",
+          "💕|two hearts love|hearts",
+          "💯|100 perfect score|symbols",
+          "✅|check mark done yes complete|symbols",
+          "☑️|check box task|symbols",
+          "✨|sparkles shine new|symbols",
+          "⭐|star rating|symbols",
+          "🔥|fire hot trending lit|symbols",
+          "💡|idea lightbulb tip|symbols",
+          "⚠️|warning caution alert|symbols",
+          "❗|exclamation important|symbols",
+          "❓|question help|symbols",
+          "➡️|arrow right next|symbols",
+          "📎|paperclip attach file|objects",
+          "📁|folder project|objects",
+          "📅|calendar date schedule|objects",
+          "⏰|alarm clock time schedule|objects",
+          "📍|pin location map|objects",
+          "📞|phone call contact|objects",
+          "💼|briefcase work business|objects",
+          "🏠|home house|objects",
+          "🔧|wrench tools fix repair|objects",
+          "🛠️|hammer tools build|objects",
+          "☕|coffee break cafe|objects",
+          "🎉|party popper celebrate congrats|objects",
+          "🎁|gift present birthday|objects",
+          "🚗|car drive transport|objects",
+        ]);
+
+        function amsEmojiReadRecent() {
+          try {
+            var raw = localStorage.getItem(AMS_EMOJI_RECENT_KEY);
+            var arr = raw ? JSON.parse(raw) : [];
+            return Array.isArray(arr) ? arr.filter(Boolean) : [];
+          } catch (e) {
+            return [];
+          }
+        }
+
+        function amsEmojiPushRecent(ch) {
+          if (!ch) return;
+          var arr = amsEmojiReadRecent().filter(function (x) {
+            return x !== ch;
+          });
+          arr.unshift(ch);
+          arr = arr.slice(0, 24);
+          try {
+            localStorage.setItem(AMS_EMOJI_RECENT_KEY, JSON.stringify(arr));
+          } catch (e) {}
+        }
+
+        function amsEmojiPopularList() {
+          var seen = {};
+          var out = [];
+          amsEmojiReadRecent().forEach(function (c) {
+            if (!seen[c]) {
+              seen[c] = true;
+              out.push({ c: c, k: "recent", t: "popular" });
+            }
+          });
+          AMS_EMOJI_ITEMS.forEach(function (it) {
+            if (AMS_POPULAR[it.c] && !seen[it.c]) {
+              seen[it.c] = true;
+              out.push(it);
+            }
+          });
+          return out;
+        }
+
+        function amsEmojiDedupeByChar(items) {
+          var seen = {};
+          return items.filter(function (it) {
+            if (seen[it.c]) return false;
+            seen[it.c] = true;
+            return true;
+          });
+        }
+
+        function amsInsertAtCursor(textarea, text) {
+          if (!textarea || text == null || text === "") return;
+          var start = textarea.selectionStart;
+          var end = textarea.selectionEnd;
+          var val = textarea.value || "";
+          if (typeof start !== "number" || typeof end !== "number") {
+            textarea.value = val + text;
+            textarea.focus();
+            return;
+          }
+          textarea.value = val.slice(0, start) + text + val.slice(end);
+          var pos = start + text.length;
+          textarea.selectionStart = textarea.selectionEnd = pos;
+          textarea.focus();
+        }
+
+        (function initEmojiPicker() {
+          var btnEmoji = document.getElementById("ams-btn-emoji");
+          var emojiPanel = document.getElementById("ams-emoji-panel");
+          var emojiSearch = document.getElementById("ams-emoji-search");
+          var emojiClose = document.getElementById("ams-emoji-close");
+          var emojiTabsEl = document.getElementById("ams-emoji-tabs");
+          var emojiGrid = document.getElementById("ams-emoji-grid");
+          var emojiEmpty = document.getElementById("ams-emoji-empty");
+          if (!btnEmoji || !emojiPanel || !emojiTabsEl || !emojiGrid) return;
+
+          var emojiState = { cat: "popular", open: false };
+          var TAB_DEF = [
+            { id: "popular", label: "Popular" },
+            { id: "smileys", label: "Smileys" },
+            { id: "gestures", label: "Gestures" },
+            { id: "hearts", label: "Hearts" },
+            { id: "objects", label: "Objects" },
+            { id: "symbols", label: "Symbols" },
+          ];
+
+          var docMousedown = null;
+          var docKeydown = null;
+
+          function closeEmojiPanel() {
+            if (!emojiPanel.hidden) {
+              emojiPanel.hidden = true;
+              btnEmoji.setAttribute("aria-expanded", "false");
+            }
+            emojiState.open = false;
+            if (docMousedown) {
+              document.removeEventListener("mousedown", docMousedown, true);
+              docMousedown = null;
+            }
+            if (docKeydown) {
+              document.removeEventListener("keydown", docKeydown, true);
+              docKeydown = null;
+            }
+          }
+
+          function openEmojiPanel() {
+            emojiPanel.hidden = false;
+            btnEmoji.setAttribute("aria-expanded", "true");
+            emojiState.open = true;
+            renderEmojiPicker();
+            setTimeout(function () {
+              if (docMousedown) document.removeEventListener("mousedown", docMousedown, true);
+              docMousedown = function (ev) {
+                var t = ev.target;
+                if (emojiPanel.contains(t) || btnEmoji.contains(t)) return;
+                closeEmojiPanel();
+              };
+              document.addEventListener("mousedown", docMousedown, true);
+            }, 0);
+            if (docKeydown) document.removeEventListener("keydown", docKeydown, true);
+            docKeydown = function (ev) {
+              if (ev.key === "Escape") {
+                ev.preventDefault();
+                closeEmojiPanel();
+                btnEmoji.focus();
+              }
+            };
+            document.addEventListener("keydown", docKeydown, true);
+            if (window.matchMedia && window.matchMedia("(min-width: 640px)").matches && emojiSearch) {
+              setTimeout(function () {
+                emojiSearch.focus();
+              }, 50);
+            }
+          }
+
+          function buildEmojiItemsForView() {
+            var q = (emojiSearch && emojiSearch.value ? emojiSearch.value : "").toLowerCase().trim();
+            var tokens = q.split(/\s+/).filter(Boolean);
+            var base =
+              emojiState.cat === "popular"
+                ? amsEmojiPopularList()
+                : AMS_EMOJI_ITEMS.filter(function (it) {
+                    return it.t === emojiState.cat;
+                  });
+            if (!tokens.length) return base;
+            var pool = amsEmojiDedupeByChar(amsEmojiPopularList().concat(AMS_EMOJI_ITEMS));
+            return pool.filter(function (it) {
+              var blob = (it.k + " " + it.c).toLowerCase();
+              return tokens.every(function (tok) {
+                return blob.indexOf(tok) !== -1;
+              });
+            });
+          }
+
+          function renderEmojiPicker() {
+            TAB_DEF.forEach(function (def) {
+              var b = emojiTabsEl.querySelector("[data-emoji-cat='" + def.id + "']");
+              if (b) b.classList.toggle("is-active", emojiState.cat === def.id);
+            });
+            var items = buildEmojiItemsForView();
+            if (emojiEmpty) {
+              emojiEmpty.hidden = items.length > 0;
+            }
+            emojiGrid.innerHTML = items
+              .map(function (it) {
+                return (
+                  "<button type='button' class='ams-emoji-cell' data-ch='" +
+                  esc(it.c) +
+                  "' title='" +
+                  esc(String(it.k || "").split(/\s+/).slice(0, 4).join(" ")) +
+                  "' aria-label='" +
+                  esc("Insert " + it.c) +
+                  "'>" +
+                  it.c +
+                  "</button>"
+                );
+              })
+              .join("");
+          }
+
+          TAB_DEF.forEach(function (def) {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.className = "ams-emoji-tab";
+            b.setAttribute("data-emoji-cat", def.id);
+            b.setAttribute("role", "tab");
+            b.setAttribute("aria-selected", def.id === "popular" ? "true" : "false");
+            b.textContent = def.label;
+            b.addEventListener("click", function () {
+              emojiState.cat = def.id;
+              TAB_DEF.forEach(function (d) {
+                var x = emojiTabsEl.querySelector("[data-emoji-cat='" + d.id + "']");
+                if (x) x.setAttribute("aria-selected", d.id === emojiState.cat ? "true" : "false");
+              });
+              if (emojiSearch) emojiSearch.value = "";
+              renderEmojiPicker();
+            });
+            emojiTabsEl.appendChild(b);
+          });
+
+          emojiTabsEl.querySelector("[data-emoji-cat='popular']").classList.add("is-active");
+
+          btnEmoji.addEventListener("click", function (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            if (typeof window.__amsCloseThemePanel === "function") window.__amsCloseThemePanel();
+            if (!emojiPanel.hidden) {
+              closeEmojiPanel();
+              return;
+            }
+            openEmojiPanel();
+          });
+
+          if (emojiClose) {
+            emojiClose.addEventListener("click", function (ev) {
+              ev.preventDefault();
+              closeEmojiPanel();
+              btnEmoji.focus();
+            });
+          }
+
+          if (emojiSearch) {
+            emojiSearch.addEventListener("input", function () {
+              renderEmojiPicker();
+            });
+            emojiSearch.addEventListener("keydown", function (ev) {
+              if (ev.key === "Escape") {
+                ev.stopPropagation();
+                closeEmojiPanel();
+                btnEmoji.focus();
+              }
+            });
+          }
+
+          emojiGrid.addEventListener("click", function (ev) {
+            var cell = ev.target.closest(".ams-emoji-cell");
+            if (!cell || !inputEl) return;
+            var ch = cell.getAttribute("data-ch") || "";
+            if (!ch) return;
+            amsEmojiPushRecent(ch);
+            amsInsertAtCursor(inputEl, ch);
+            renderEmojiPicker();
+          });
+
+          emojiPanel.addEventListener("mousedown", function (ev) {
+            ev.stopPropagation();
+          });
+
+          window.__amsCloseEmojiPicker = closeEmojiPanel;
+        })();
+
+        (function initChatThemePicker() {
+          var btnTheme = document.getElementById("ams-btn-theme");
+          var themePanel = document.getElementById("ams-theme-panel");
+          var themeGrid = document.getElementById("ams-theme-grid");
+          if (!btnTheme || !themePanel || !themeGrid) return;
+
+          var docMd = null;
+          var docKd = null;
+
+          function closeThemePanel() {
+            themePanel.hidden = true;
+            btnTheme.setAttribute("aria-expanded", "false");
+            if (docMd) {
+              document.removeEventListener("mousedown", docMd, true);
+              docMd = null;
+            }
+            if (docKd) {
+              document.removeEventListener("keydown", docKd, true);
+              docKd = null;
+            }
+          }
+
+          function openThemePanel() {
+            if (typeof window.__amsCloseEmojiPicker === "function") window.__amsCloseEmojiPicker();
+            themePanel.hidden = false;
+            btnTheme.setAttribute("aria-expanded", "true");
+            setTimeout(function () {
+              if (docMd) document.removeEventListener("mousedown", docMd, true);
+              docMd = function (ev) {
+                var x = ev.target;
+                if (themePanel.contains(x) || btnTheme.contains(x)) return;
+                closeThemePanel();
+              };
+              document.addEventListener("mousedown", docMd, true);
+            }, 0);
+            if (docKd) document.removeEventListener("keydown", docKd, true);
+            docKd = function (ev) {
+              if (ev.key === "Escape") {
+                ev.preventDefault();
+                closeThemePanel();
+                btnTheme.focus();
+              }
+            };
+            document.addEventListener("keydown", docKd, true);
+          }
+
+          CHAT_THEMES.forEach(function (t) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "ams-theme-opt";
+            btn.setAttribute("data-theme-id", t.id);
+            if (t.id === currentChatThemeId) btn.classList.add("is-current");
+            btn.style.setProperty("--sw-a", t.vars["--ams-avatar-from"]);
+            btn.style.setProperty("--sw-b", t.vars["--ams-avatar-to"]);
+            var sw = document.createElement("span");
+            sw.className = "ams-theme-swatch";
+            sw.setAttribute("aria-hidden", "true");
+            var lab = document.createElement("span");
+            lab.textContent = t.label;
+            btn.appendChild(sw);
+            btn.appendChild(lab);
+            btn.addEventListener("click", function () {
+              applyChatTheme(t.id);
+              closeThemePanel();
+            });
+            themeGrid.appendChild(btn);
+          });
+
+          btnTheme.addEventListener("click", function (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            if (typeof window.__amsCloseEmojiPicker === "function") window.__amsCloseEmojiPicker();
+            if (!themePanel.hidden) {
+              closeThemePanel();
+              return;
+            }
+            openThemePanel();
+          });
+
+          themePanel.addEventListener("mousedown", function (ev) {
+            ev.stopPropagation();
+          });
+
+          window.__amsCloseThemePanel = closeThemePanel;
+        })();
+
+        loadInbox();
+      })();
+    </script>
+  </body>
+</html>

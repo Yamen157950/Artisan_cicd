@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="View a service provider on Artisan and send a booking request." />
+    <title>Provider profile | Artisan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --navy: #0a192f;
+        --royal: #1a237e;
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #dbe3f0;
+        --green: #16a34a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, sans-serif;
+        color: var(--text);
+        background: #f3f6fb;
+      }
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: linear-gradient(120deg, var(--navy), var(--royal));
+        color: #fff;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      }
+      .topbar__inner {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+      }
+      .brand {
+        color: #fff;
+        text-decoration: none;
+        font-size: 1.4rem;
+        font-weight: 800;
+      }
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .icon-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.14);
+        text-decoration: none;
+      }
+      .icon-btn:hover {
+        background: rgba(255, 255, 255, 0.24);
+      }
+      .page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 1.2rem 1rem 2.5rem;
+      }
+      .back-link {
+        display: inline-block;
+        margin-bottom: 1rem;
+        color: var(--royal);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .back-link:hover {
+        text-decoration: underline;
+      }
+      .profile-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+      }
+      .profile-head {
+        display: flex;
+        gap: 1.25rem;
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+      .profile-avatar {
+        width: 112px;
+        height: 112px;
+        border-radius: 16px;
+        object-fit: cover;
+        border: 1px solid var(--border);
+        background: #e8edf5;
+      }
+      .profile-head__text h1 {
+        margin: 0 0 0.35rem;
+        font-size: 1.5rem;
+        line-height: 1.25;
+      }
+      .profile-meta {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+      }
+      .profile-rating {
+        font-weight: 600;
+        color: var(--text);
+      }
+      .profile-bio {
+        margin: 1rem 0 0;
+        line-height: 1.55;
+        color: #334155;
+      }
+      .profile-extra {
+        margin-top: 0.75rem;
+        font-size: 0.95rem;
+        color: #475569;
+      }
+      .work-section {
+        margin-top: 1.5rem;
+        padding-top: 1.35rem;
+        border-top: 1px solid var(--border);
+      }
+      .work-section__title {
+        margin: 0 0 0.35rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .work-section__hint {
+        margin: 0 0 1rem;
+        font-size: 0.875rem;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+      .work-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 0.85rem;
+      }
+      .work-grid__item {
+        margin: 0;
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f1f5f9;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+        cursor: pointer;
+        font: inherit;
+        text-align: left;
+        display: block;
+        width: 100%;
+      }
+      .work-grid__item:focus-visible {
+        outline: 2px solid var(--royal);
+        outline-offset: 3px;
+      }
+      .work-grid__item img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 4/3;
+        object-fit: cover;
+        vertical-align: middle;
+        pointer-events: none;
+      }
+      .work-lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+      .work-lightbox.work-lightbox--open {
+        display: flex;
+      }
+      .work-lightbox__backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.85);
+        cursor: pointer;
+      }
+      .work-lightbox__dialog {
+        position: relative;
+        z-index: 1;
+        max-width: min(96vw, 1200px);
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.65rem;
+      }
+      .work-lightbox__stage {
+        position: relative;
+        display: inline-block;
+        max-width: 100%;
+      }
+      .work-lightbox__img {
+        display: block;
+        max-width: min(90vw, 1100px);
+        max-height: calc(92vh - 3.5rem);
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+        background: #0f172a;
+      }
+      .work-lightbox__close {
+        position: absolute;
+        top: -2.75rem;
+        right: 0;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        font-size: 1.5rem;
+        line-height: 1;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: inherit;
+      }
+      .work-lightbox__close:hover {
+        background: rgba(255, 255, 255, 0.22);
+      }
+      .work-lightbox__nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        background: rgba(15, 23, 42, 0.55);
+        color: #fff;
+        font-size: 1.35rem;
+        line-height: 1;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: inherit;
+        padding: 0;
+      }
+      .work-lightbox__nav:hover:not(:disabled) {
+        background: rgba(15, 23, 42, 0.8);
+      }
+      .work-lightbox__close:focus-visible,
+      .work-lightbox__nav:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 2px;
+      }
+      .work-lightbox__nav:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
+      .work-lightbox__nav--prev {
+        left: 0.35rem;
+      }
+      .work-lightbox__nav--next {
+        right: 0.35rem;
+      }
+      .work-lightbox__counter {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #e2e8f0;
+        min-height: 1.25rem;
+      }
+      @media (max-width: 520px) {
+        .work-lightbox__close {
+          top: -2.5rem;
+        }
+        .work-lightbox__nav--prev {
+          left: 0.15rem;
+        }
+        .work-lightbox__nav--next {
+          right: 0.15rem;
+        }
+      }
+      .booking-panel {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border);
+      }
+      .booking-panel h2 {
+        margin: 0 0 0.75rem;
+        font-size: 1.1rem;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0.5rem 1.25rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .btn--primary {
+        background: var(--green);
+        color: #fff;
+      }
+      .btn--primary:hover {
+        filter: brightness(1.05);
+      }
+      .btn--ghost {
+        background: #f1f5f9;
+        color: var(--text);
+      }
+      textarea {
+        width: 100%;
+        min-height: 100px;
+        padding: 0.75rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        font-family: inherit;
+        font-size: 0.95rem;
+        resize: vertical;
+        margin-bottom: 0.75rem;
+      }
+      .hint {
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin: 0 0 0.75rem;
+      }
+      .error-box {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+        padding: 1rem;
+        border-radius: 10px;
+      }
+      .loading {
+        color: var(--muted);
+      }
+      .profile-public-note {
+        font-size: 0.875rem;
+        color: var(--muted);
+        margin: 0 0 1.15rem;
+        padding: 0.65rem 0.85rem;
+        background: #f1f5f9;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        line-height: 1.45;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__inner">
+        <a href="index.html" class="brand">Artisan</a>
+        <div class="top-actions">
+          <a class="icon-btn" href="index.html" title="Home" aria-label="Home">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+          </a>
+          <a class="icon-btn" href="customer-account.html" title="My Account" aria-label="My Account">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <a class="back-link" href="customer-services.html">← Browse providers</a>
+
+      <p id="profile-loading" class="loading">Loading profile…</p>
+      <div id="profile-error" class="error-box" style="display: none"></div>
+
+      <article id="profile-content" class="profile-card" style="display: none">
+        <p id="profile-public-banner" class="profile-public-note" style="display: none" role="status"></p>
+        <div class="profile-head">
+          <img id="p-photo" class="profile-avatar" src="" alt="" width="112" height="112" />
+          <div class="profile-head__text">
+            <h1 id="p-name">—</h1>
+            <div class="profile-meta">
+              <span id="p-trade">—</span>
+              <span aria-hidden="true"> · </span>
+              <span id="p-city">—</span>
+            </div>
+            <div class="profile-rating"><span id="p-rating">—</span></div>
+          </div>
+        </div>
+        <p id="p-bio" class="profile-bio"></p>
+        <div id="p-extra" class="profile-extra"></div>
+
+        <section id="work-section" class="work-section" style="display: none" aria-label="Work samples">
+          <h2 class="work-section__title">Work samples</h2>
+          <p class="work-section__hint">Photos this professional added from their account — examples of their work.</p>
+          <div id="p-work" class="work-grid"></div>
+        </section>
+
+        <section class="booking-panel" id="booking-panel"></section>
+      </article>
+    </main>
+
+    <script src="js/api-config.js"></script>
+    <script src="js/artisan-api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        var params = new URLSearchParams(window.location.search);
+        var id = (params.get("id") || "").trim();
+        var pnFallback = (params.get("pn") || "").trim();
+
+        var elLoad = document.getElementById("profile-loading");
+        var elErr = document.getElementById("profile-error");
+        var elCard = document.getElementById("profile-content");
+        var bookingPanel = document.getElementById("booking-panel");
+
+        function showError(msg) {
+          if (elLoad) elLoad.style.display = "none";
+          if (elCard) elCard.style.display = "none";
+          if (elErr) {
+            elErr.style.display = "block";
+            elErr.textContent = msg;
+          }
+        }
+
+        function esc(s) {
+          return String(s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+        }
+
+        function mapSessionTradeToCategory(raw) {
+          if (!raw) return "";
+          var m = { Plumber: "Plumbing", Carpenter: "Carpentry", Electrician: "Electrical" };
+          return m[raw] || raw;
+        }
+
+        function parseWorkPhotos(raw) {
+          if (raw == null || raw === "") return [];
+          try {
+            var a;
+            if (Array.isArray(raw)) {
+              a = raw;
+            } else if (typeof raw === "string") {
+              var t = raw.trim();
+              if (!t) return [];
+              a = JSON.parse(t);
+              if (typeof a === "string") {
+                a = JSON.parse(a);
+              }
+            } else {
+              return [];
+            }
+            if (!Array.isArray(a)) return [];
+            return a
+              .map(function (x) {
+                if (typeof x === "string") return x.trim();
+                if (x && typeof x === "object") {
+                  var u = x.url || x.src || x.href;
+                  return u ? String(u).trim() : "";
+                }
+                return "";
+              })
+              .filter(Boolean);
+          } catch (e) {
+            return [];
+          }
+        }
+
+        function buildSessionProvider() {
+          try {
+            var name = sessionStorage.getItem("artisan_provider_name");
+            if (!name || !String(name).trim()) return null;
+            var rawTrade = sessionStorage.getItem("artisan_selected_trade") || "";
+            var trade = mapSessionTradeToCategory(rawTrade) || rawTrade || "—";
+            var bio = sessionStorage.getItem("artisan_provider_bio") || "";
+            var photo =
+              sessionStorage.getItem("artisan_provider_avatar") ||
+              "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=80";
+            var priceLabel = "";
+            var experienceLabel = "";
+            if (window.ArtisanUI) {
+              if (ArtisanUI.getSessionProviderPrice && ArtisanUI.formatProviderPriceDisplay) {
+                var pr = ArtisanUI.getSessionProviderPrice();
+                priceLabel = ArtisanUI.formatProviderPriceDisplay(pr.amount, pr.unit) || "";
+              }
+              if (ArtisanUI.getSessionProviderExperienceYears && ArtisanUI.formatExperienceLine) {
+                experienceLabel = ArtisanUI.formatExperienceLine(ArtisanUI.getSessionProviderExperienceYears()) || "";
+              }
+            }
+            return {
+              id: "local-session-provider",
+              displayName: name.trim(),
+              trade: trade,
+              city: sessionStorage.getItem("artisan_provider_city") || "",
+              bio: bio,
+              photoUrl: photo,
+              rating: null,
+              priceLabel: priceLabel || null,
+              experienceLabel: experienceLabel || null,
+              workPhotosJson: sessionStorage.getItem("artisan_provider_work_photos") || "[]",
+            };
+          } catch (e) {
+            return null;
+          }
+        }
+
+        function currentUserRole() {
+          try {
+            var u = window.ArtisanAuth && ArtisanAuth.getStoredUser && ArtisanAuth.getStoredUser();
+            return u ? String(u.role || "").toLowerCase() : "";
+          } catch (e) {
+            return "";
+          }
+        }
+
+        function isLoggedIn() {
+          return !!(window.ArtisanAuth && ArtisanAuth.getAccessToken && ArtisanAuth.getAccessToken());
+        }
+
+        function isOwnProviderProfile(providerId) {
+          if (currentUserRole() !== "provider") return false;
+          try {
+            var mine = ArtisanAuth.getProviderProfileId && ArtisanAuth.getProviderProfileId();
+            return mine && String(mine) === String(providerId);
+          } catch (e) {
+            return false;
+          }
+        }
+
+        var workLb = {
+          root: null,
+          img: null,
+          prev: null,
+          next: null,
+          closeBtn: null,
+          counter: null,
+          photos: [],
+          index: 0,
+          displayName: "",
+          keyHandler: null,
+          lastFocus: null,
+        };
+
+        function ensureWorkLightbox() {
+          if (workLb.root) return;
+          var root = document.createElement("div");
+          root.id = "work-lightbox";
+          root.className = "work-lightbox";
+          root.setAttribute("role", "dialog");
+          root.setAttribute("aria-modal", "true");
+          root.setAttribute("aria-hidden", "true");
+          root.setAttribute("aria-label", "Work sample gallery");
+          root.innerHTML =
+            '<div class="work-lightbox__backdrop"></div>' +
+            '<div class="work-lightbox__dialog">' +
+            '<button type="button" class="work-lightbox__close" aria-label="Close gallery">×</button>' +
+            '<div class="work-lightbox__stage">' +
+            '<button type="button" class="work-lightbox__nav work-lightbox__nav--prev" aria-label="Previous sample">‹</button>' +
+            '<img class="work-lightbox__img" alt="" />' +
+            '<button type="button" class="work-lightbox__nav work-lightbox__nav--next" aria-label="Next sample">›</button>' +
+            "</div>" +
+            '<p class="work-lightbox__counter" aria-live="polite"></p>' +
+            "</div>";
+          document.body.appendChild(root);
+          workLb.root = root;
+          workLb.img = root.querySelector(".work-lightbox__img");
+          workLb.prev = root.querySelector(".work-lightbox__nav--prev");
+          workLb.next = root.querySelector(".work-lightbox__nav--next");
+          workLb.closeBtn = root.querySelector(".work-lightbox__close");
+          workLb.counter = root.querySelector(".work-lightbox__counter");
+          root.querySelector(".work-lightbox__backdrop").addEventListener("click", closeWorkLightbox);
+          workLb.closeBtn.addEventListener("click", closeWorkLightbox);
+          workLb.prev.addEventListener("click", function () {
+            stepWorkLightbox(-1);
+          });
+          workLb.next.addEventListener("click", function () {
+            stepWorkLightbox(1);
+          });
+        }
+
+        function updateWorkLightboxView() {
+          var n = workLb.photos.length;
+          if (!n || !workLb.img) return;
+          var i = workLb.index;
+          workLb.img.src = workLb.photos[i];
+          workLb.img.alt = workLb.displayName + " — work sample " + (i + 1);
+          workLb.counter.textContent = n > 1 ? i + 1 + " / " + n : "";
+          if (workLb.prev && workLb.next) {
+            workLb.prev.disabled = i === 0 || n <= 1;
+            workLb.next.disabled = i === n - 1 || n <= 1;
+            workLb.prev.style.visibility = n <= 1 ? "hidden" : "visible";
+            workLb.next.style.visibility = n <= 1 ? "hidden" : "visible";
+          }
+        }
+
+        function openWorkLightbox(photos, index, displayName) {
+          if (!photos || !photos.length) return;
+          ensureWorkLightbox();
+          workLb.photos = photos.slice();
+          workLb.index = Math.max(0, Math.min(index, workLb.photos.length - 1));
+          workLb.displayName = displayName ? String(displayName).replace(/</g, "") : "Provider";
+          workLb.lastFocus = document.activeElement;
+          workLb.root.classList.add("work-lightbox--open");
+          workLb.root.setAttribute("aria-hidden", "false");
+          document.body.style.overflow = "hidden";
+          updateWorkLightboxView();
+          workLb.keyHandler = function (ev) {
+            if (!workLb.root.classList.contains("work-lightbox--open")) return;
+            if (ev.key === "Escape") {
+              closeWorkLightbox();
+              ev.preventDefault();
+            } else if (ev.key === "ArrowLeft") {
+              stepWorkLightbox(-1);
+              ev.preventDefault();
+            } else if (ev.key === "ArrowRight") {
+              stepWorkLightbox(1);
+              ev.preventDefault();
+            }
+          };
+          document.addEventListener("keydown", workLb.keyHandler, true);
+          requestAnimationFrame(function () {
+            try {
+              workLb.closeBtn.focus();
+            } catch (e) {}
+          });
+        }
+
+        function closeWorkLightbox() {
+          if (!workLb.root || !workLb.root.classList.contains("work-lightbox--open")) return;
+          workLb.root.classList.remove("work-lightbox--open");
+          workLb.root.setAttribute("aria-hidden", "true");
+          document.body.style.overflow = "";
+          if (workLb.keyHandler) {
+            document.removeEventListener("keydown", workLb.keyHandler, true);
+            workLb.keyHandler = null;
+          }
+          if (workLb.img) workLb.img.removeAttribute("src");
+          var lf = workLb.lastFocus;
+          workLb.lastFocus = null;
+          if (lf && typeof lf.focus === "function") {
+            try {
+              lf.focus();
+            } catch (e) {}
+          }
+        }
+
+        function stepWorkLightbox(delta) {
+          var n = workLb.photos.length;
+          if (!n) return;
+          workLb.index += delta;
+          if (workLb.index < 0) workLb.index = 0;
+          if (workLb.index > n - 1) workLb.index = n - 1;
+          updateWorkLightboxView();
+        }
+
+        function bindWorkGridLightbox(grid, photos, providerName) {
+          if (!grid) return;
+          grid.onclick = null;
+          if (!photos || !photos.length) return;
+          grid.onclick = function (ev) {
+            var btn = ev.target.closest(".work-grid__item");
+            if (!btn || !grid.contains(btn)) return;
+            var items = grid.querySelectorAll(".work-grid__item");
+            var idx = Array.prototype.indexOf.call(items, btn);
+            if (idx < 0) return;
+            openWorkLightbox(photos, idx, providerName);
+          };
+        }
+
+        function renderProfile(p) {
+          if (elLoad) elLoad.style.display = "none";
+          if (elErr) elErr.style.display = "none";
+          if (elCard) elCard.style.display = "block";
+
+          var name = p.displayName || pnFallback || "Provider";
+          document.title = name.replace(/</g, "") + " | Artisan";
+
+          var img = document.getElementById("p-photo");
+          if (img) {
+            img.src = p.photoUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=80";
+            img.alt = name + " profile photo";
+          }
+          document.getElementById("p-name").textContent = name;
+          document.getElementById("p-trade").textContent = p.trade || "—";
+          var cityVal = String(p.city || "").trim();
+          document.getElementById("p-city").textContent = cityVal && cityVal.toLowerCase() !== "jordan" ? cityVal : "—";
+
+          var r = p.rating;
+          var ratingEl = document.getElementById("p-rating");
+          if (ratingEl) {
+            ratingEl.textContent =
+              typeof r === "number" && !isNaN(r) ? "★ " + r.toFixed(1) + " average rating" : "No ratings yet";
+          }
+
+          var bioEl = document.getElementById("p-bio");
+          if (bioEl) {
+            bioEl.textContent = p.bio || "";
+            bioEl.style.display = p.bio ? "block" : "none";
+          }
+
+          var extraParts = [];
+          if (p.priceLabel) extraParts.push(esc(p.priceLabel));
+          if (p.experienceLabel) extraParts.push(esc(p.experienceLabel));
+          var extra = document.getElementById("p-extra");
+          if (extra) {
+            extra.innerHTML = extraParts.length ? extraParts.join("<br />") : "";
+            extra.style.display = extraParts.length ? "block" : "none";
+          }
+
+          var photos = parseWorkPhotos(p.workPhotosJson);
+          var grid = document.getElementById("p-work");
+          var workSection = document.getElementById("work-section");
+          if (grid && workSection) {
+            if (photos.length) {
+              workSection.style.display = "block";
+              grid.innerHTML = photos
+                .map(function (url, idx) {
+                  var alt = name + " — work sample " + (idx + 1);
+                  return (
+                    '<button type="button" class="work-grid__item" aria-haspopup="dialog" aria-label="' +
+                    esc("Open work sample " + (idx + 1) + " in gallery") +
+                    '">' +
+                    '<img src="' +
+                    esc(url) +
+                    '" alt="' +
+                    esc(alt) +
+                    '" loading="lazy" decoding="async" />' +
+                    "</button>"
+                  );
+                })
+                .join("");
+              bindWorkGridLightbox(grid, photos, name);
+            } else {
+              workSection.style.display = "none";
+              grid.innerHTML = "";
+              bindWorkGridLightbox(grid, [], name);
+            }
+          }
+
+          var banner = document.getElementById("profile-public-banner");
+          if (banner) {
+            var ownListing = isOwnProviderProfile(p.id);
+            if (ownListing) {
+              banner.style.display = "none";
+              banner.textContent = "";
+            } else {
+              banner.style.display = "block";
+              banner.textContent =
+                "This page shows public listing information only (name, trade, area, rating, portfolio). To book, use Book this service below.";
+            }
+          }
+
+          renderBooking(p);
+        }
+
+        function bookingPageHref(providerId, profile) {
+          var h = "book-service.html?id=" + encodeURIComponent(providerId);
+          var name = profile && profile.displayName != null ? String(profile.displayName).trim() : "";
+          if (name) h += "&pn=" + encodeURIComponent(name);
+          return h;
+        }
+
+        function renderBooking(p) {
+          if (!bookingPanel) return;
+          var providerId = p.id;
+          bookingPanel.innerHTML = "";
+
+          if (isOwnProviderProfile(providerId)) {
+            bookingPanel.innerHTML =
+              '<h2>Your public listing</h2><p class="hint">Customers see only this public information until they use Book this service.</p>' +
+              '<a class="btn btn--ghost" href="provider-profile-settings.html">Edit profile settings</a>';
+            return;
+          }
+
+          var bookUrl = bookingPageHref(providerId, p);
+          var hrefAttr = bookUrl.replace(/&/g, "&amp;");
+
+          if (!isLoggedIn()) {
+            bookingPanel.innerHTML =
+              "<h2>Book this service</h2>" +
+              "<p class=\"hint\">Log in to open the calendar and send your booking request.</p>" +
+              '<a class="btn btn--primary" href="login.html" id="login-to-book">Book this service</a>';
+            var loginBtn = document.getElementById("login-to-book");
+            if (loginBtn) {
+              loginBtn.addEventListener("click", function () {
+                try {
+                  sessionStorage.setItem("artisan_after_login_redirect", bookUrl);
+                } catch (e) {}
+              });
+            }
+            return;
+          }
+
+          bookingPanel.innerHTML =
+            "<h2>Book this service</h2>" +
+            "<p class=\"hint\">Choose your preferred date — bookings are available from January 2026.</p>" +
+            '<a class="btn btn--primary" href="' +
+            hrefAttr +
+            '">Book this service</a>';
+        }
+
+        function syncProviderIdFromSession() {
+          try {
+            if (window.ArtisanAuth && ArtisanAuth.getProviderProfileId) {
+              var sid = ArtisanAuth.getProviderProfileId();
+              if (sid) return String(sid).trim();
+            }
+            var u = window.ArtisanAuth && ArtisanAuth.getStoredUser && ArtisanAuth.getStoredUser();
+            if (u && u.providerProfileId) return String(u.providerProfileId).trim();
+          } catch (e) {}
+          return "";
+        }
+
+        function syncProviderIdFromMeApi() {
+          if (!window.ArtisanAuth || !ArtisanAuth.apiJson || !ArtisanAuth.getAccessToken || !ArtisanAuth.getAccessToken()) {
+            return Promise.resolve("");
+          }
+          return ArtisanAuth.apiJson("/api/auth/me", { method: "GET" }).then(function (res) {
+            if (!res.ok || !res.data) return "";
+            var pid =
+              res.data.providerProfileId != null
+                ? res.data.providerProfileId
+                : res.data.ProviderProfileId;
+            if (pid && ArtisanAuth.setProviderProfileId) ArtisanAuth.setProviderProfileId(pid);
+            return pid ? String(pid).trim() : "";
+          });
+        }
+
+        function resolveProviderId() {
+          if (id) return Promise.resolve(id);
+          var fromSession = syncProviderIdFromSession();
+          if (fromSession) return Promise.resolve(fromSession);
+          return syncProviderIdFromMeApi();
+        }
+
+        function updateUrlWithId(resolvedId) {
+          if (!resolvedId || params.get("id")) return;
+          try {
+            var u = new URL(window.location.href);
+            u.searchParams.set("id", resolvedId);
+            if (pnFallback && !u.searchParams.get("pn")) u.searchParams.set("pn", pnFallback);
+            window.history.replaceState({}, "", u.pathname + u.search + u.hash);
+          } catch (e) {}
+        }
+
+        function runWithId(resolvedId) {
+          id = resolvedId;
+          updateUrlWithId(id);
+
+          if (!id) {
+            showError("Missing provider id. Go back to Browse and open a profile from the list.");
+            return;
+          }
+
+          if (id === "local-session-provider") {
+            var local = buildSessionProvider();
+            if (!local) {
+              showError("No local demo profile found. Complete provider setup or pick a provider from Browse.");
+              return;
+            }
+            renderProfile(local);
+            return;
+          }
+
+          if (!window.ArtisanAuth || !ArtisanAuth.apiJson) {
+            showError("Could not load API script.");
+            return;
+          }
+
+          ArtisanAuth.apiJson("/api/providers/" + encodeURIComponent(id), { method: "GET" }).then(function (res) {
+            if (res.status === 404 || !res.ok || !res.data) {
+              showError("This profile was not found or is hidden from search.");
+              return;
+            }
+            var d = res.data;
+            var wj = d.workPhotosJson != null ? d.workPhotosJson : d.WorkPhotosJson;
+            renderProfile({
+              id: d.id,
+              displayName: d.displayName,
+              trade: d.trade,
+              city: d.city,
+              bio: d.bio,
+              rating: d.rating,
+              photoUrl: d.photoUrl,
+              priceLabel: d.priceLabel,
+              experienceLabel: d.experienceLabel,
+              workPhotosJson: wj,
+            });
+          });
+        }
+
+        function run() {
+          resolveProviderId().then(function (resolvedId) {
+            runWithId(resolvedId);
+          });
+        }
+
+        run();
+      })();
+    </script>
+  </body>
+</html>

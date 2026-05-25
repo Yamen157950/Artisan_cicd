@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Find trusted service providers on Artisan — search by trade and location." />
+    <title>Find providers | Artisan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --navy: #0a192f;
+        --royal: #1a237e;
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #dbe3f0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, sans-serif;
+        color: var(--text);
+        background: #f3f6fb;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: linear-gradient(120deg, var(--navy), var(--royal));
+        color: #fff;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      }
+      .topbar__inner {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+      }
+      .brand {
+        color: #fff;
+        text-decoration: none;
+        font-size: 1.4rem;
+        font-weight: 800;
+      }
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .icon-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.14);
+        text-decoration: none;
+      }
+      .icon-btn:hover {
+        background: rgba(255, 255, 255, 0.24);
+      }
+
+      .page {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 1.2rem 1rem 2rem;
+      }
+      .search-panel {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+        padding: 0.85rem 1rem;
+      }
+      .search-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.6rem;
+      }
+      .search-row input,
+      .search-row select {
+        min-height: 48px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.65rem 0.8rem;
+        font: inherit;
+      }
+      .search-row button {
+        border: none;
+        border-radius: 10px;
+        min-width: 120px;
+        background: #16a34a;
+        color: #fff;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .search-row button:hover {
+        filter: brightness(1.06);
+      }
+      .filter-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.65rem 1rem;
+        margin-top: 0.7rem;
+        padding-top: 0.7rem;
+        border-top: 1px solid #eef2f7;
+      }
+      .filters {
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        flex: 1 1 280px;
+        align-items: center;
+        min-width: 0;
+      }
+      button.chip {
+        padding: 0.36rem 0.72rem;
+        border-radius: 999px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #334155;
+        cursor: pointer;
+        font: inherit;
+        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      }
+      button.chip:hover {
+        border-color: #94a3b8;
+        background: #f8fafc;
+      }
+      button.chip.active {
+        background: #dbeafe;
+        border-color: #bfdbfe;
+        color: #1e3a8a;
+      }
+      button.chip:focus-visible {
+        outline: 2px solid #1e40af;
+        outline-offset: 2px;
+      }
+
+      .price-range {
+        flex: 1 1 260px;
+        max-width: 100%;
+        margin: 0;
+        background: #f8fafc;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        padding: 0.5rem 0.65rem 0.45rem;
+      }
+      @media (min-width: 900px) {
+        .price-range {
+          flex: 0 1 340px;
+          margin-left: auto;
+        }
+      }
+      .price-range__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.4rem;
+        margin-bottom: 0.4rem;
+      }
+      .price-range__title {
+        margin: 0;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .price-range__reset {
+        border: none;
+        background: transparent;
+        font: inherit;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--royal);
+        cursor: pointer;
+        padding: 0.2rem 0.35rem;
+        border-radius: 6px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+      .price-range__reset.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .price-range__reset:hover {
+        text-decoration: underline;
+      }
+      .price-range__control {
+        display: grid;
+        grid-template-columns: 58px 1fr 58px;
+        gap: 0.45rem;
+        align-items: center;
+      }
+      .price-range__slider-wrap {
+        position: relative;
+        height: 24px;
+        margin: 0;
+        grid-column: 1 / -1;
+        grid-row: 1;
+        padding: 0 2px;
+      }
+      .price-range__track {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 6px;
+        border-radius: 999px;
+        background: #dbe3f0;
+      }
+      .price-range__fill {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--royal), #3b5bdb);
+        box-shadow: 0 1px 4px rgba(26, 35, 126, 0.25);
+        pointer-events: none;
+      }
+      .price-range__slider-wrap input[type="range"] {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin: 0;
+        height: 28px;
+        background: transparent;
+        pointer-events: none;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      #price-min-range {
+        z-index: 3;
+      }
+      #price-max-range {
+        z-index: 4;
+      }
+      .price-range__slider-wrap input[type="range"]::-webkit-slider-runnable-track {
+        height: 6px;
+        background: transparent;
+      }
+      .price-range__slider-wrap input[type="range"]::-moz-range-track {
+        height: 6px;
+        background: transparent;
+      }
+      .price-range__slider-wrap input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        pointer-events: auto;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        background: var(--royal);
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.22);
+        cursor: grab;
+        margin-top: -7px;
+      }
+      .price-range__slider-wrap input[type="range"]::-moz-range-thumb {
+        pointer-events: auto;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        background: var(--royal);
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.22);
+        cursor: grab;
+      }
+      .price-range__slider-wrap input[type="range"]:focus-visible::-webkit-slider-thumb {
+        outline: 2px solid #93c5fd;
+        outline-offset: 2px;
+      }
+      .price-range__field {
+        position: relative;
+        grid-row: 2;
+      }
+      .price-range__field:first-of-type {
+        grid-column: 1;
+      }
+      .price-range__field:last-of-type {
+        grid-column: 3;
+      }
+      .price-range__field span {
+        position: absolute;
+        left: 0.45rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: #94a3b8;
+        pointer-events: none;
+      }
+      .price-range__field input {
+        width: 100%;
+        min-height: 34px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.35rem 0.4rem 0.35rem 1.85rem;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 600;
+        background: #fff;
+        color: var(--text);
+      }
+      .price-range__field input:focus {
+        outline: none;
+        border-color: #93c5fd;
+        box-shadow: 0 0 0 2px rgba(59, 91, 219, 0.12);
+      }
+      .price-range__scale {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: #94a3b8;
+        margin-top: 0.2rem;
+        padding: 0 2px;
+      }
+      .price-range__summary {
+        margin: 0.35rem 0 0;
+        font-size: 0.7rem;
+        color: var(--muted);
+        font-weight: 500;
+        line-height: 1.3;
+        min-height: 0;
+      }
+      .price-range__summary:empty,
+      .price-range__summary.is-idle {
+        display: none;
+      }
+      .price-range__summary strong {
+        color: var(--royal);
+        font-weight: 700;
+      }
+
+      .section-head {
+        margin: 1.2rem 0 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+      }
+      .section-head h2 {
+        margin: 0;
+        font-size: 1.22rem;
+      }
+      .section-head select {
+        min-height: 40px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0 0.6rem;
+        font: inherit;
+      }
+
+      .grid {
+        display: grid;
+        gap: 0.9rem;
+        grid-template-columns: 1fr;
+      }
+      @media (min-width: 760px) {
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (min-width: 1060px) {
+        .grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      .provider-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .provider-card__top {
+        display: flex;
+        gap: 0.85rem;
+        padding: 1rem 0.85rem 0;
+        align-items: flex-start;
+      }
+      .provider-card__avatar {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid var(--border);
+        background: #e2e8f0;
+      }
+      .provider-card__head {
+        min-width: 0;
+        flex: 1;
+      }
+      .provider-card__name {
+        margin: 0 0 0.2rem;
+        font-size: 1.05rem;
+        font-weight: 700;
+        line-height: 1.25;
+      }
+      .provider-card__trade {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #1e40af;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+      }
+      .provider-card__body {
+        padding: 0.65rem 0.85rem 0.85rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+      .provider-card__bio {
+        margin: 0 0 0.65rem;
+        color: var(--muted);
+        font-size: 0.88rem;
+        line-height: 1.45;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .provider-card__price {
+        margin: 0 0 0.55rem;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+      .provider-card__experience {
+        margin: 0 0 0.55rem;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: #334155;
+      }
+      .provider-card__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 0.75rem;
+        align-items: center;
+        font-size: 0.84rem;
+        color: var(--muted);
+        margin-bottom: 0.75rem;
+      }
+      .provider-card__meta strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .provider-card__actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: auto;
+      }
+      .btn {
+        border: none;
+        border-radius: 10px;
+        padding: 0.52rem 0.9rem;
+        background: #1e3a8a;
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .btn:hover {
+        background: #1e40af;
+      }
+
+      .providers-results {
+        margin-top: 0;
+      }
+      .pagination {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.65rem;
+        margin-top: 1.5rem;
+        padding: 0 0 0.25rem;
+      }
+      .pagination[hidden] {
+        display: none !important;
+      }
+      .pagination__info {
+        margin: 0;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 0.01em;
+      }
+      .pagination__controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+      }
+      .pagination__btn {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        color: #0f172a;
+        font: inherit;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        line-height: 1;
+        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+      }
+      .pagination__btn:hover:not(:disabled):not(.is-active) {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+      }
+      .pagination__btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: #f8fafc;
+      }
+      .pagination__btn--page.is-active {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+        cursor: default;
+      }
+      .pagination__btn--nav {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #334155;
+      }
+      .pagination__ellipsis {
+        min-width: 28px;
+        text-align: center;
+        color: #64748b;
+        font-weight: 700;
+        font-size: 0.95rem;
+        user-select: none;
+        letter-spacing: 0.12em;
+      }
+
+      .empty-state {
+        grid-column: 1 / -1;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+        padding: 1.4rem 1.2rem;
+        text-align: center;
+        color: #475569;
+      }
+      .empty-state h3 {
+        margin: 0 0 0.4rem;
+        color: #0f172a;
+      }
+      .empty-state p {
+        margin: 0;
+        max-width: 44ch;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.5;
+      }
+      .topbar-link {
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.92rem;
+        margin-right: 0.5rem;
+        opacity: 0.95;
+      }
+      .topbar-link:hover {
+        text-decoration: underline;
+      }
+
+      .booking-notify-wrap {
+        position: relative;
+      }
+      .booking-notify-btn {
+        position: relative;
+      }
+      .booking-notify-badge {
+        position: absolute;
+        top: 1px;
+        right: 1px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 999px;
+        background: #ef4444;
+        color: #fff;
+        font-size: 0.62rem;
+        font-weight: 800;
+        line-height: 14px;
+        text-align: center;
+        border: 2px solid rgba(10, 25, 47, 0.95);
+        box-sizing: content-box;
+        pointer-events: none;
+      }
+      .booking-notify-badge[hidden] {
+        display: none !important;
+      }
+      .booking-notify-panel {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: min(380px, calc(100vw - 1.5rem));
+        max-height: min(440px, 72vh);
+        overflow: auto;
+        background: #fff;
+        color: var(--text);
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        box-shadow: 0 18px 48px rgba(15, 23, 42, 0.2);
+        z-index: 80;
+        padding: 0.5rem 0 0.65rem;
+      }
+      .booking-notify-panel[hidden] {
+        display: none !important;
+      }
+      .booking-notify-head {
+        padding: 0.35rem 1rem 0.6rem;
+        border-bottom: 1px solid var(--border);
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+      .booking-notify-item {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e8edf5;
+        font-size: 0.88rem;
+        line-height: 1.45;
+      }
+      .booking-notify-item:last-child {
+        border-bottom: none;
+      }
+      .booking-notify-item__title {
+        font-weight: 700;
+        margin: 0 0 0.35rem;
+        color: #0f172a;
+      }
+      .booking-notify-item__meta {
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin: 0 0 0.4rem;
+      }
+      .booking-notify-item__body {
+        margin: 0;
+        color: #475569;
+        font-size: 0.82rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .booking-notify-item--accepted .booking-notify-item__title {
+        color: #15803d;
+      }
+      .booking-notify-item--rejected .booking-notify-item__title {
+        color: #b91c1c;
+      }
+      .booking-notify-links {
+        margin-top: 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .booking-notify-links a {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #1e40af;
+      }
+      .booking-notify-empty {
+        padding: 1.25rem 1rem;
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.88rem;
+        line-height: 1.5;
+      }
+      .booking-notify-err {
+        padding: 0.75rem 1rem;
+        color: #b91c1c;
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__inner">
+        <a href="index.html" class="brand">Artisan</a>
+        <div class="top-actions" style="display: flex; align-items: center; gap: 0.5rem">
+          <a class="icon-btn" href="index.html" title="Home" aria-label="Home">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+          </a>
+          <div class="booking-notify-wrap" id="booking-notify-wrap" data-auth-only hidden>
+            <button type="button" class="icon-btn booking-notify-btn" id="booking-notify-btn" aria-label="Booking notifications" aria-expanded="false" aria-controls="booking-notify-panel">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span class="booking-notify-badge" id="booking-notify-badge" hidden aria-hidden="true">0</span>
+            </button>
+            <div class="booking-notify-panel" id="booking-notify-panel" role="region" aria-label="Booking responses" hidden>
+              <div class="booking-notify-head">Booking updates</div>
+              <div id="booking-notify-list"></div>
+            </div>
+          </div>
+          <a class="icon-btn" href="chat-thread.html" title="My Chats" aria-label="My Chats" data-auth-only hidden>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </a>
+          <a class="icon-btn" href="customer-account.html" title="My Account" aria-label="My Account">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="search-panel">
+        <div class="search-row">
+          <input
+            id="provider-search"
+            type="search"
+            placeholder="Search by name, trade, or city…"
+            autocomplete="off"
+            aria-label="Search providers"
+          />
+          <button type="button" id="provider-search-btn">Search</button>
+        </div>
+        <div class="filter-toolbar">
+          <div class="filters" role="group" aria-label="Filter by trade">
+            <button type="button" class="chip active" data-trade="all" aria-pressed="true">All</button>
+            <button type="button" class="chip" data-trade="Plumbing" aria-pressed="false">Plumbing</button>
+            <button type="button" class="chip" data-trade="Carpentry" aria-pressed="false">Carpentry</button>
+            <button type="button" class="chip" data-trade="Electrical" aria-pressed="false">Electrical</button>
+            <button type="button" class="chip" data-trade="Cleaning" aria-pressed="false">Cleaning</button>
+            <button type="button" class="chip" data-trade="Painting" aria-pressed="false">Painting</button>
+            <button type="button" class="chip" data-trade="Barber" aria-pressed="false">Barber</button>
+          </div>
+          <aside class="price-range" aria-labelledby="price-range-title">
+            <div class="price-range__head">
+              <h3 class="price-range__title" id="price-range-title">Price range</h3>
+              <button type="button" class="price-range__reset" id="price-range-reset" aria-label="Reset price range">Reset</button>
+            </div>
+            <div class="price-range__control">
+              <div class="price-range__slider-wrap">
+                <div class="price-range__track" aria-hidden="true"></div>
+                <div class="price-range__fill" id="price-range-fill" aria-hidden="true"></div>
+                <input type="range" id="price-min-range" min="0" max="100" value="0" step="1" aria-label="Minimum price in JOD" />
+                <input type="range" id="price-max-range" min="0" max="100" value="100" step="1" aria-label="Maximum price in JOD" />
+              </div>
+              <div class="price-range__field">
+                <span>JOD</span>
+                <input type="number" id="price-min-input" min="0" max="100" value="0" step="1" placeholder="Min" aria-label="Minimum price" />
+              </div>
+              <div class="price-range__field">
+                <span>JOD</span>
+                <input type="number" id="price-max-input" min="0" max="100" value="100" step="1" placeholder="Max" aria-label="Maximum price" />
+              </div>
+            </div>
+            <div class="price-range__scale" aria-hidden="true">
+              <span>0</span>
+              <span id="price-range-max-label">100+</span>
+            </div>
+            <p class="price-range__summary is-idle" id="price-range-summary" aria-live="polite"></p>
+          </aside>
+        </div>
+      </section>
+
+      <div class="section-head">
+        <h2>Service providers</h2>
+        <select id="provider-sort" aria-label="Sort providers">
+          <option value="rating">Sort: Top rated</option>
+          <option value="price_asc">Sort: Lowest price</option>
+        </select>
+      </div>
+
+      <div class="providers-results">
+        <section class="grid" id="providers-grid" aria-label="Service provider profiles" aria-live="polite"></section>
+        <nav class="pagination" id="providers-pagination" aria-label="Providers pagination" hidden></nav>
+      </div>
+    </main>
+
+    <script src="js/api-config.js"></script>
+    <script src="js/artisan-api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        /**
+         * Filled from GET /api/providers (Artisan .NET API) plus optional session demo provider.
+         * Expected shape per item:
+         * { id, displayName, trade, city, bio, rating, photoUrl, profileUrl?, joinedAt? (ISO date) }
+         */
+        var PROVIDERS = [];
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var initialQuery = (urlParams.get("q") || "").trim();
+
+        function loadProvidersFromApi(done) {
+          var api = window.ARTISAN_API_BASE || "http://localhost:5172";
+          fetch(api + "/api/providers")
+            .then(function (r) {
+              return r.ok ? r.json() : [];
+            })
+            .then(function (rows) {
+              PROVIDERS = Array.isArray(rows) ? rows : [];
+            })
+            .catch(function () {
+              PROVIDERS = [];
+            })
+            .finally(function () {
+              if (typeof done === "function") done();
+            });
+        }
+
+        var SEARCH_VISIBLE_KEY = "artisan_provider_visible_in_search";
+
+        /** Prefer live ratings from localStorage (ArtisanUI) when provider id is known. */
+        function liveRating(p) {
+          var id = p && p.id != null ? String(p.id) : "";
+          if (id && window.ArtisanUI && typeof window.ArtisanUI.getProviderRating === "function") {
+            var s = window.ArtisanUI.getProviderRating(id);
+            if (s && s.avg != null) return s.avg;
+          }
+          return typeof p.rating === "number" && !isNaN(p.rating) ? p.rating : null;
+        }
+
+        var grid = document.getElementById("providers-grid");
+        var searchInput = document.getElementById("provider-search");
+        if (searchInput && initialQuery) searchInput.value = initialQuery;
+        var searchBtn = document.getElementById("provider-search-btn");
+        var sortSelect = document.getElementById("provider-sort");
+        var chips = document.querySelectorAll(".filters .chip");
+
+        var PRICE_SLIDER_MAX = 100;
+        var PAGE_SIZE = 9;
+        var state = { trade: "all", query: initialQuery, priceMin: 0, priceMax: PRICE_SLIDER_MAX, page: 1 };
+        var paginationNav = document.getElementById("providers-pagination");
+
+        function normalize(s) {
+          return (s || "").toLowerCase().trim();
+        }
+
+        function mapSessionTradeToCategory(raw) {
+          if (!raw) return "";
+          var m = { Plumber: "Plumbing", Carpenter: "Carpentry", Electrician: "Electrical" };
+          return m[raw] || raw;
+        }
+
+        function isSessionProviderHiddenFromSearch() {
+          try {
+            return sessionStorage.getItem(SEARCH_VISIBLE_KEY) === "false";
+          } catch (e) {
+            return false;
+          }
+        }
+
+        function isLoggedInProvider() {
+          try {
+            var u = window.ArtisanAuth && ArtisanAuth.getStoredUser && ArtisanAuth.getStoredUser();
+            return !!(
+              window.ArtisanAuth &&
+              ArtisanAuth.getAccessToken &&
+              ArtisanAuth.getAccessToken() &&
+              u &&
+              String(u.role || "").toLowerCase() === "provider"
+            );
+          } catch (e) {
+            return false;
+          }
+        }
+
+        function isLoggedInCustomer() {
+          try {
+            var u = window.ArtisanAuth && ArtisanAuth.getStoredUser && ArtisanAuth.getStoredUser();
+            return !!(
+              window.ArtisanAuth &&
+              ArtisanAuth.getAccessToken &&
+              ArtisanAuth.getAccessToken() &&
+              u &&
+              String(u.role || "").toLowerCase() === "customer"
+            );
+          } catch (e) {
+            return false;
+          }
+        }
+
+        /** API rows + optional session-based profile (demo). Respects searchable flags and visibility toggle. */
+        function getAllProviders() {
+          var base = PROVIDERS.slice().filter(function (p) {
+            return p.searchable !== false && p.visibleInSearch !== false && p.hiddenFromSearch !== true;
+          });
+          if (isLoggedInProvider()) return base;
+          if (isLoggedInCustomer()) return base;
+          if (isSessionProviderHiddenFromSearch()) return base;
+          try {
+            var name = sessionStorage.getItem("artisan_provider_name");
+            if (!name || !String(name).trim()) return base;
+            var rawTrade = sessionStorage.getItem("artisan_selected_trade") || "";
+            var trade = mapSessionTradeToCategory(rawTrade) || rawTrade || "—";
+            var bio = sessionStorage.getItem("artisan_provider_bio") || "";
+            var photo =
+              sessionStorage.getItem("artisan_provider_avatar") ||
+              "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=80";
+            var priceLabel = "";
+            if (window.ArtisanUI && window.ArtisanUI.getSessionProviderPrice && window.ArtisanUI.formatProviderPriceDisplay) {
+              var pr = window.ArtisanUI.getSessionProviderPrice();
+              priceLabel = window.ArtisanUI.formatProviderPriceDisplay(pr.amount, pr.unit) || "";
+            }
+            var experienceLabel = "";
+            if (window.ArtisanUI && window.ArtisanUI.getSessionProviderExperienceYears && window.ArtisanUI.formatExperienceLine) {
+              var ey = window.ArtisanUI.getSessionProviderExperienceYears();
+              experienceLabel = window.ArtisanUI.formatExperienceLine(ey) || "";
+            }
+            var storedCity = sessionStorage.getItem("artisan_provider_city") || "";
+            base.push({
+              id: "local-session-provider",
+              displayName: name.trim(),
+              trade: trade,
+              city: storedCity,
+              bio: bio,
+              photoUrl: photo,
+              joinedAt: "2026-04-12",
+              priceLabel: priceLabel,
+              experienceLabel: experienceLabel,
+            });
+          } catch (e) {}
+          return base;
+        }
+
+        /** First JOD amount in priceLabel, e.g. "15 JOD / hour" → 15. No label → null (sorted last). */
+        function parsePriceJod(p) {
+          var label = p && p.priceLabel != null ? String(p.priceLabel) : "";
+          var m = label.match(/(\d+(?:\.\d+)?)\s*JOD/i);
+          if (m) return parseFloat(m[1]);
+          return null;
+        }
+
+        function isPriceFilterActive() {
+          return state.priceMin > 0 || state.priceMax < PRICE_SLIDER_MAX;
+        }
+
+        function matchesPriceRange(p) {
+          if (!isPriceFilterActive()) return true;
+          var price = parsePriceJod(p);
+          if (price == null) return false;
+          if (price < state.priceMin) return false;
+          if (state.priceMax < PRICE_SLIDER_MAX && price > state.priceMax) return false;
+          return true;
+        }
+
+        function formatPriceFilterLabel() {
+          if (!isPriceFilterActive()) return "any price";
+          if (state.priceMax >= PRICE_SLIDER_MAX) {
+            return "JOD " + state.priceMin + "+";
+          }
+          if (state.priceMin <= 0) {
+            return "up to JOD " + state.priceMax;
+          }
+          return "JOD " + state.priceMin + " – " + state.priceMax;
+        }
+
+        function getFiltered() {
+          var list = getAllProviders();
+          if (state.trade !== "all") {
+            list = list.filter(function (p) {
+              return p.trade === state.trade;
+            });
+          }
+          if (isPriceFilterActive()) {
+            list = list.filter(matchesPriceRange);
+          }
+          var q = normalize(state.query);
+          if (q) {
+            list = list.filter(function (p) {
+              return (
+                normalize(p.displayName).indexOf(q) !== -1 ||
+                normalize(p.trade).indexOf(q) !== -1 ||
+                normalize(p.city).indexOf(q) !== -1 ||
+                normalize(p.bio).indexOf(q) !== -1 ||
+                normalize(p.priceLabel || "").indexOf(q) !== -1 ||
+                normalize(p.experienceLabel || "").indexOf(q) !== -1
+              );
+            });
+          }
+          return list;
+        }
+
+        function sortList(list) {
+          var mode = sortSelect ? sortSelect.value : "rating";
+          var out = list.slice();
+          if (mode === "rating") {
+            out.sort(function (a, b) {
+              return (liveRating(b) || 0) - (liveRating(a) || 0);
+            });
+          } else if (mode === "price_asc") {
+            out.sort(function (a, b) {
+              var pa = parsePriceJod(a);
+              var pb = parsePriceJod(b);
+              if (pa == null && pb == null) {
+                return (liveRating(b) || 0) - (liveRating(a) || 0);
+              }
+              if (pa == null) return 1;
+              if (pb == null) return -1;
+              if (pa !== pb) return pa - pb;
+              return (liveRating(b) || 0) - (liveRating(a) || 0);
+            });
+          }
+          return out;
+        }
+
+        function escapeHtml(str) {
+          return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+        }
+
+        function normalizeGovernorate(city) {
+          var value = String(city || "").trim();
+          if (!value) return "";
+          if (value.toLowerCase() === "jordan") return "";
+          return value;
+        }
+
+        function profileHref(p) {
+          if (p.profileUrl) return escapeHtml(p.profileUrl);
+          var id = encodeURIComponent(p.id != null ? String(p.id) : "");
+          var href = "provider-profile.html?id=" + id;
+          var dn = p.displayName != null ? String(p.displayName).trim() : "";
+          if (dn) href += "&pn=" + encodeURIComponent(dn);
+          return href;
+        }
+
+        function resetPage() {
+          state.page = 1;
+        }
+
+        function hidePagination() {
+          if (paginationNav) {
+            paginationNav.hidden = true;
+            paginationNav.innerHTML = "";
+          }
+        }
+
+        function scrollToResults() {
+          var anchor = document.querySelector(".section-head") || grid;
+          if (anchor && anchor.scrollIntoView) {
+            anchor.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }
+
+        function pageItemsForList(list) {
+          var total = list.length;
+          var totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+          if (state.page > totalPages) state.page = totalPages;
+          if (state.page < 1) state.page = 1;
+          var start = (state.page - 1) * PAGE_SIZE;
+          return {
+            pageList: list.slice(start, start + PAGE_SIZE),
+            total: total,
+            totalPages: totalPages,
+            start: start,
+          };
+        }
+
+        function renderPagination(meta) {
+          if (!paginationNav) return;
+          if (!meta || meta.total === 0) {
+            hidePagination();
+            return;
+          }
+          var current = state.page;
+          var totalPages = meta.totalPages;
+          var from = meta.start + 1;
+          var to = Math.min(meta.start + PAGE_SIZE, meta.total);
+
+          var infoText =
+            totalPages > 1
+              ? "Showing " + from + "–" + to + " of " + meta.total + " providers"
+              : meta.total + " provider" + (meta.total === 1 ? "" : "s");
+
+          var html =
+            '<p class="pagination__info">' + escapeHtml(infoText) + "</p>" + '<div class="pagination__controls">';
+
+          html +=
+            '<button type="button" class="pagination__btn pagination__btn--nav" data-page="prev" ' +
+            (current <= 1 ? "disabled" : "") +
+            ' aria-label="Previous page">‹</button>';
+
+          function addPageBtn(num) {
+            html +=
+              '<button type="button" class="pagination__btn pagination__btn--page' +
+              (num === current ? " is-active" : "") +
+              '" data-page="' +
+              num +
+              '" aria-label="Page ' +
+              num +
+              '"' +
+              (num === current ? ' aria-current="page"' : "") +
+              ">" +
+              num +
+              "</button>";
+          }
+
+          if (totalPages <= 7) {
+            for (var i = 1; i <= totalPages; i++) addPageBtn(i);
+          } else {
+            addPageBtn(1);
+            if (current > 3) html += '<span class="pagination__ellipsis">…</span>';
+            var lo = Math.max(2, current - 1);
+            var hi = Math.min(totalPages - 1, current + 1);
+            for (var j = lo; j <= hi; j++) addPageBtn(j);
+            if (current < totalPages - 2) html += '<span class="pagination__ellipsis">…</span>';
+            addPageBtn(totalPages);
+          }
+
+          html +=
+            '<button type="button" class="pagination__btn pagination__btn--nav" data-page="next" ' +
+            (current >= totalPages ? "disabled" : "") +
+            ' aria-label="Next page">›</button>';
+
+          html += "</div>";
+          paginationNav.innerHTML = html;
+          paginationNav.hidden = false;
+
+          paginationNav.querySelectorAll("[data-page]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var action = btn.getAttribute("data-page");
+              var next = current;
+              if (action === "prev") next = current - 1;
+              else if (action === "next") next = current + 1;
+              else next = parseInt(action, 10);
+              if (isNaN(next) || next === current) return;
+              state.page = next;
+              render(true);
+            });
+          });
+        }
+
+        function render(scrollAfter) {
+          syncPriceRangeUi();
+          var list = sortList(getFiltered());
+
+          if (!getAllProviders().length) {
+            hidePagination();
+            grid.innerHTML =
+              '<article class="empty-state">' +
+              "<h3>No provider profiles yet</h3>" +
+              "<p>Provider accounts will show here after you load them from your backend API. Providers can hide themselves from search using their dashboard toggle.</p>" +
+              "</article>";
+            return;
+          }
+
+          if (!list.length) {
+            hidePagination();
+            var hint = "Try a different name, city, or keyword.";
+            if (state.trade !== "all" && isPriceFilterActive()) {
+              hint = "Try another trade, widen the price range, or clear your filters.";
+            } else if (state.trade !== "all") {
+              hint = "Try another trade or clear the search.";
+            } else if (isPriceFilterActive()) {
+              hint = "Widen the price range or reset the filter to see more providers.";
+            }
+            grid.innerHTML =
+              '<article class="empty-state">' +
+              "<h3>No providers match your filters</h3>" +
+              "<p>" +
+              escapeHtml(hint) +
+              "</p>" +
+              "</article>";
+            return;
+          }
+
+          var meta = pageItemsForList(list);
+          renderPagination(meta);
+
+          grid.innerHTML = meta.pageList
+            .map(function (p) {
+              var name = escapeHtml(p.displayName || "Provider");
+              var trade = escapeHtml(p.trade || "");
+              var cityLabel = normalizeGovernorate(p.city) || "—";
+              var city = escapeHtml(cityLabel);
+              var bio = escapeHtml(p.bio || "");
+              var photo = escapeHtml(p.photoUrl || "");
+              var rVal = liveRating(p);
+              var rating = rVal != null && !isNaN(rVal) ? rVal.toFixed(1) : "—";
+              var alt = escapeHtml((p.displayName || "Provider") + " profile photo");
+              var priceLine = p.priceLabel ? escapeHtml(p.priceLabel) : "";
+              var expLine = p.experienceLabel ? escapeHtml(p.experienceLabel) : "";
+
+              return (
+                '<article class="provider-card">' +
+                '<div class="provider-card__top">' +
+                '<img class="provider-card__avatar" src="' +
+                photo +
+                '" alt="' +
+                alt +
+                '" width="72" height="72" loading="lazy" />' +
+                '<div class="provider-card__head">' +
+                '<h3 class="provider-card__name">' +
+                name +
+                "</h3>" +
+                '<span class="provider-card__trade">' +
+                trade +
+                "</span>" +
+                "</div>" +
+                "</div>" +
+                '<div class="provider-card__body">' +
+                (bio ? '<p class="provider-card__bio">' + bio + "</p>" : "") +
+                (priceLine ? '<p class="provider-card__price">' + priceLine + "</p>" : "") +
+                (expLine ? '<p class="provider-card__experience">' + expLine + "</p>" : "") +
+                '<div class="provider-card__meta">' +
+                "<span><strong>" +
+                city +
+                "</strong></span>" +
+                "<span>★ " +
+                rating +
+                "</span>" +
+                "</div>" +
+                '<div class="provider-card__actions">' +
+                '<a class="btn" href="' +
+                profileHref(p) +
+                '" title="Open public profile and book a service">View profile</a>' +
+                "</div>" +
+                "</div>" +
+                "</article>"
+              );
+            })
+            .join("");
+
+          if (scrollAfter) scrollToResults();
+        }
+
+        function setActiveChip(activeBtn) {
+          chips.forEach(function (btn) {
+            var on = btn === activeBtn;
+            btn.classList.toggle("active", on);
+            btn.setAttribute("aria-pressed", on ? "true" : "false");
+          });
+        }
+
+        chips.forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            state.trade = btn.getAttribute("data-trade") || "all";
+            setActiveChip(btn);
+            resetPage();
+            render();
+          });
+        });
+
+        function runSearch() {
+          state.query = searchInput ? searchInput.value : "";
+          resetPage();
+          render();
+        }
+
+        if (searchBtn) searchBtn.addEventListener("click", runSearch);
+        if (searchInput) {
+          searchInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              runSearch();
+            }
+          });
+        }
+        if (sortSelect) {
+          sortSelect.addEventListener("change", function () {
+            resetPage();
+            render();
+          });
+        }
+
+        function clampPrice(n) {
+          var v = Math.round(Number(n));
+          if (isNaN(v)) v = 0;
+          if (v < 0) v = 0;
+          if (v > PRICE_SLIDER_MAX) v = PRICE_SLIDER_MAX;
+          return v;
+        }
+
+        function syncPriceRangeUi() {
+          var minR = document.getElementById("price-min-range");
+          var maxR = document.getElementById("price-max-range");
+          var minI = document.getElementById("price-min-input");
+          var maxI = document.getElementById("price-max-input");
+          var fill = document.getElementById("price-range-fill");
+          var maxLbl = document.getElementById("price-range-max-label");
+          var resetBtn = document.getElementById("price-range-reset");
+          var summary = document.getElementById("price-range-summary");
+
+          var min = clampPrice(state.priceMin);
+          var max = clampPrice(state.priceMax);
+          if (min > max) {
+            var t = min;
+            min = max;
+            max = t;
+          }
+          state.priceMin = min;
+          state.priceMax = max;
+
+          if (minR) minR.value = String(min);
+          if (maxR) maxR.value = String(max);
+          if (minI) minI.value = String(min);
+          if (maxI) maxI.value = String(max >= PRICE_SLIDER_MAX ? PRICE_SLIDER_MAX : max);
+
+          if (fill) {
+            var lo = (min / PRICE_SLIDER_MAX) * 100;
+            var hi = (max / PRICE_SLIDER_MAX) * 100;
+            fill.style.left = lo + "%";
+            fill.style.width = Math.max(0, hi - lo) + "%";
+          }
+          if (maxLbl) {
+            maxLbl.textContent = max >= PRICE_SLIDER_MAX ? "100+" : String(max);
+          }
+          if (resetBtn) {
+            resetBtn.classList.toggle("is-visible", isPriceFilterActive());
+          }
+          if (summary) {
+            if (!isPriceFilterActive()) {
+              summary.innerHTML = "";
+              summary.classList.add("is-idle");
+            } else {
+              var filtered = getFiltered().length;
+              var label = formatPriceFilterLabel();
+              summary.classList.remove("is-idle");
+              summary.innerHTML =
+                "<strong>" +
+                filtered +
+                "</strong> match · " +
+                "<strong>" +
+                escapeHtml(label) +
+                "</strong>";
+            }
+          }
+        }
+
+        function setPriceRange(min, max, rerender) {
+          state.priceMin = clampPrice(min);
+          state.priceMax = clampPrice(max);
+          if (state.priceMin > state.priceMax) {
+            var swap = state.priceMin;
+            state.priceMin = state.priceMax;
+            state.priceMax = swap;
+          }
+          resetPage();
+          syncPriceRangeUi();
+          if (rerender !== false) render();
+        }
+
+        function resetPriceRange() {
+          setPriceRange(0, PRICE_SLIDER_MAX);
+        }
+
+        (function initPriceRange() {
+          var minR = document.getElementById("price-min-range");
+          var maxR = document.getElementById("price-max-range");
+          var minI = document.getElementById("price-min-input");
+          var maxI = document.getElementById("price-max-input");
+          var resetBtn = document.getElementById("price-range-reset");
+          if (!minR || !maxR) return;
+
+          minR.addEventListener("input", function () {
+            setPriceRange(minR.value, state.priceMax);
+          });
+          maxR.addEventListener("input", function () {
+            setPriceRange(state.priceMin, maxR.value);
+          });
+          if (minI) {
+            minI.addEventListener("change", function () {
+              setPriceRange(minI.value, state.priceMax);
+            });
+            minI.addEventListener("keydown", function (e) {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                setPriceRange(minI.value, state.priceMax);
+              }
+            });
+          }
+          if (maxI) {
+            maxI.addEventListener("change", function () {
+              setPriceRange(state.priceMin, maxI.value);
+            });
+            maxI.addEventListener("keydown", function (e) {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                setPriceRange(state.priceMin, maxI.value);
+              }
+            });
+          }
+          if (resetBtn) {
+            resetBtn.addEventListener("click", resetPriceRange);
+          }
+          syncPriceRangeUi();
+        })();
+
+        (function applyUrlState() {
+          var trade = urlParams.get("trade");
+          if (!trade) return;
+          var allowed = ["Plumbing", "Carpentry", "Electrical", "Cleaning", "Painting", "Barber"];
+          if (allowed.indexOf(trade) === -1) return;
+          state.trade = trade;
+          chips.forEach(function (btn) {
+            if (btn.getAttribute("data-trade") === trade) {
+              setActiveChip(btn);
+            }
+          });
+        })();
+
+        window.addEventListener("artisan-ratings-updated", function () {
+          render();
+        });
+        window.addEventListener("storage", function (e) {
+          if (e.key === "artisan_provider_ratings_v1") render();
+        });
+
+        if (window.ArtisanUI && typeof ArtisanUI.initBookingNotificationCenter === "function") {
+          ArtisanUI.initBookingNotificationCenter({
+            wrapId: "booking-notify-wrap",
+            btnId: "booking-notify-btn",
+            panelId: "booking-notify-panel",
+            listId: "booking-notify-list",
+            badgeId: "booking-notify-badge",
+            panelTitle: "Responses from providers",
+          });
+        }
+
+        loadProvidersFromApi(render);
+      })();
+    </script>
+  </body>
+</html>

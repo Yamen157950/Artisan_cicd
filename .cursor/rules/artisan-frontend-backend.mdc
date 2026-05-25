@@ -1,0 +1,38 @@
+---
+description: ربط صفحات Artisan frontend بـ Backend API — إلزامي لكل صفحة أو مكوّن جديد
+globs: frontend/**/*.html,frontend/js/**/*.js,Backend/ArtisanApi/**/*.cs
+alwaysApply: false
+---
+
+# Artisan — ربط الواجهة بالـ Backend
+
+## عند إنشاء أو تعديل أي صفحة HTML (`frontend/**/*.html`)
+
+1. **السكربتات (بهذا الترتيب)** — ما لم تكن الصفحة ثابتة بالكامل بدون بيانات:
+   - `js/api-config.js` (يضبط `ARTISAN_API_BASE` الافتراضي `http://localhost:5172`)
+   - `js/artisan-api.js` (JWT + `ArtisanAuth.apiJson` والدوال الجاهزة)
+   - `js/app.js` مع `defer` عند الحاجة للتنقل، التوست، نماذج التسجيل/الدخول، لوحة المقدّم
+
+2. **أي استدعاء API** — استخدم `window.ArtisanAuth`:
+   - عام بدون جلسة: `ArtisanAuth.apiJson("/api/...", { method: "GET" })` مع `auth: false` إن لزم
+   - مع المستخدم: نفس الدالة (يُرفق `Authorization: Bearer` تلقائياً ما عدا عند `auth: false`)
+   - دوال جاهزة: `register`, `login`, `me`, `updateMyAccount`, `getMyProviderProfile`, `updateMyProviderProfile`, `postRating`, `sendMessage`
+
+3. **صفحة تتطلب تسجيل دخول** — في بداية سكربت الصفحة استدعِ `ArtisanAuth.ensureLoggedIn()` (أو تحقق يدوياً من `getAccessToken()` وتوجيه إلى `login.html`).
+
+4. **عناصر تظهر فقط بعد تسجيل الدخول** — ضع `data-auth-only` و`hidden` على الرابط أو الزر (مثل أيقونة My Chats). بعد تحميل `artisan-api.js` يستدعي `applyAuthChrome()` ويزيل `hidden` عند وجود JWT.
+
+4. **ميزة جديدة في السيرفر** — أضف المسار في `Backend/ArtisanApi/Program.cs` (أو ملف endpoints منظم)، استخدم نماذج في `Models/`، وربط قاعدة البيانات عبر `AppDbContext` عند الحاجة. حافظ على أسماء JSON **camelCase** متوافقة مع الواجهة.
+
+5. **التشغيل المحلي** — Backend: `dotnet run --project Backend/ArtisanApi/ArtisanApi.csproj --launch-profile http`. الواجهة من Live Server أو `npx serve` على `localhost`/`127.0.0.1` (CORS مضبوط لهما).
+
+## مرجع سريع للمسارات الحالية
+
+- `GET /api/health`
+- `POST /api/auth/register` · `POST /api/auth/login` · `GET /api/auth/me` · `PUT /api/me/account` (الاسم، الهاتف، `profilePhotoUrl`، و`linkedGoogle` في `GET /api/auth/me`)
+- `GET /api/providers` · `GET /api/providers/{id}`
+- `GET/PUT /api/me/provider-profile` (دور Provider)
+- `POST /api/providers/{id}/ratings`
+- `GET /api/me/chats` · `GET /api/me/chats/{partnerUserId}/messages` · `POST /api/me/messages`
+
+عند إضافة مسار جديد: وسّع `artisan-api.js` بدالة رفيعة إن تكرّر الاستخدام، وإلا استخدم `apiJson` مباشرة من الصفحة.
