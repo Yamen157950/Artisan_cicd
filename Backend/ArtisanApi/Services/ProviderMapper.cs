@@ -43,6 +43,7 @@ public static class ProviderMapper
             JoinedAt = p.JoinedAt.ToString("yyyy-MM-dd"),
             PriceLabel = string.IsNullOrEmpty(FormatPriceLabel(p.PriceAmount, p.PriceUnit)) ? null : FormatPriceLabel(p.PriceAmount, p.PriceUnit),
             ExperienceLabel = string.IsNullOrEmpty(FormatExperienceLabel(p.ExperienceYears)) ? null : FormatExperienceLabel(p.ExperienceYears),
+            ExperienceYears = p.ExperienceYears,
             Searchable = p.VisibleInSearch,
         };
     }

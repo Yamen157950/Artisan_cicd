@@ -64,7 +64,9 @@ public sealed class AppDbContext : IdentityDbContext<ApplicationUser>
             s.HasKey(x => x.Id);
             s.Property(x => x.Body).HasMaxLength(4000);
             s.Property(x => x.Status).HasMaxLength(32);
+            s.Property(x => x.ProviderUserId).HasMaxLength(450);
             s.Property(x => x.ProviderProfileId).HasMaxLength(128);
+            s.HasIndex(x => x.ProviderUserId);
             s.HasIndex(x => x.ProviderProfileId);
             s.HasIndex(x => new { x.ProviderProfileId, x.Status });
         });

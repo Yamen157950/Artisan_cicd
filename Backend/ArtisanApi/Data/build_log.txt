@@ -1,0 +1,16 @@
+﻿records 2000
+python : Traceback (most recent call last):
+At C:\Users\NTC\AppData\Local\Temp\ps-script-ee0d90e7-791f-4d92-9e7b-6c2c8cd91054.ps1:86 char:1
++ python -c "
++ ~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "<string>", line 108, in <module>
+  File "C:\Users\NTC\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 14-17: character maps to <undefined>
+with trade 2000
+with city 1820
+sample 

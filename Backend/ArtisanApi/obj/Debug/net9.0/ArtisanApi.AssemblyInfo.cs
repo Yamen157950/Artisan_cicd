@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ArtisanApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a3b6f9f01842952f40dc77a5e9052d11c86993a0")]
 [assembly: System.Reflection.AssemblyProductAttribute("ArtisanApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ArtisanApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

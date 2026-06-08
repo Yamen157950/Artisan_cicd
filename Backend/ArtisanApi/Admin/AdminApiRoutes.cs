@@ -1,5 +1,7 @@
 using System.Security.Claims;
+using ArtisanApi.Data;
 using ArtisanApi.Models;
+using ArtisanApi.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,6 +56,74 @@ public static class AdminApiRoutes
                 }
             )
             .WithName("AdminListUsers");
+
+        admin.MapGet(
+                "/users/{userId}/profile",
+                async (string userId, UserManager<ApplicationUser> users, AppDbContext db) =>
+                {
+                    var target = await users.FindByIdAsync(userId);
+                    if (target is null)
+                        return Results.NotFound();
+
+                    var roles = await users.GetRolesAsync(target);
+                    var locked =
+                        target.LockoutEnabled
+                        && target.LockoutEnd.HasValue
+                        && target.LockoutEnd.Value.UtcDateTime > DateTime.UtcNow;
+
+                    var messageCount = await db.DirectMessages.CountAsync(m =>
+                        m.SenderUserId == userId || m.RecipientUserId == userId
+                    );
+
+                    object? providerProfile = null;
+                    var profile = await db.ProviderProfiles.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == userId);
+                    if (profile is not null)
+                    {
+                        var ratingRow = await db.ProviderRatings
+                            .AsNoTracking()
+                            .Where(r => r.ProviderProfileId == profile.Id)
+                            .GroupBy(r => r.ProviderProfileId)
+                            .Select(g => new { Avg = g.Average(x => (double)x.Score), Count = g.Count() })
+                            .FirstOrDefaultAsync();
+
+                        providerProfile = new
+                        {
+                            id = profile.Id,
+                            displayName = profile.DisplayName,
+                            trade = profile.Trade,
+                            city = profile.City,
+                            bio = profile.Bio,
+                            photoUrl = profile.PhotoUrl ?? "",
+                            workPhotosJson = profile.WorkPhotosJson,
+                            priceLabel = ProviderMapper.FormatPriceLabel(profile.PriceAmount, profile.PriceUnit),
+                            experienceLabel = ProviderMapper.FormatExperienceLabel(profile.ExperienceYears),
+                            experienceYears = profile.ExperienceYears,
+                            visibleInSearch = profile.VisibleInSearch,
+                            joinedAt = profile.JoinedAt,
+                            isSeededDemo = profile.IsSeededDemo,
+                            averageRating = ratingRow?.Avg,
+                            ratingCount = ratingRow?.Count ?? 0,
+                        };
+                    }
+
+                    return Results.Ok(
+                        new
+                        {
+                            id = target.Id,
+                            email = target.Email ?? "",
+                            fullName = target.FullName ?? "",
+                            phone = target.PhoneNumber ?? target.Phone,
+                            profilePhotoUrl = target.ProfilePhotoUrl ?? "",
+                            roles,
+                            isLockedOut = locked,
+                            emailConfirmed = target.EmailConfirmed,
+                            messageCount,
+                            providerProfile,
+                        }
+                    );
+                }
+            )
+            .WithName("AdminGetUserProfile");
 
         admin.MapPost(
                 "/users/{userId}/block",

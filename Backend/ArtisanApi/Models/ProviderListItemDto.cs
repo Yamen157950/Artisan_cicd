@@ -14,5 +14,6 @@ public class ProviderListItemDto
     public string? JoinedAt { get; init; }
     public string? PriceLabel { get; init; }
     public string? ExperienceLabel { get; init; }
+    public int? ExperienceYears { get; init; }
     public bool Searchable { get; init; } = true;
 }

@@ -26,9 +26,13 @@ var dataDir = Path.Combine(builder.Environment.ContentRootPath, "Data");
 Directory.CreateDirectory(dataDir);
 var chatAttachmentsDir = Path.Combine(dataDir, "chat-attachments");
 Directory.CreateDirectory(chatAttachmentsDir);
-var dbPath = Path.Combine(dataDir, "artisan.db");
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
-builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlite($"Data Source={dbPath}"));
+builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connectionString));
+builder.Services.AddSingleton<HerafiTrainingMatcher>();
+builder.Services.AddScoped<HerafiChatService>();
 builder.Services.Configure<FormOptions>(o =>
 {
     o.MultipartBodyLengthLimit = ChatAttachmentRules.MaxBytes + 4 * 1024 * 1024;
@@ -156,8 +160,24 @@ app.UseAuthorization();
 // SignalR hub (JWT via Authorization header on negotiate; access_token query on WebSocket upgrade).
 // If /hubs/chat returns 404, restart the API so the running process picks up this mapping.
 app.MapHub<ChatHub>("/hubs/chat").RequireAuthorization();
+app.MapHub<BrowseHub>("/hubs/browse");
 
 app.MapGet("/api/health", () => Results.Ok(new { ok = true, service = "ArtisanApi" })).WithName("Health");
+
+app.MapPost(
+        "/api/herafi/chat",
+        async (HerafiChatRequest req, HerafiChatService chat, CancellationToken ct) =>
+        {
+            var message = (req.Message ?? "").Trim();
+            if (string.IsNullOrEmpty(message))
+                return Results.Ok(new HerafiChatResponse("Please type a message.", null, 0));
+
+            var result = await chat.GetResponseAsync(message, ct);
+            return Results.Ok(new HerafiChatResponse(result.Reply, result.Navigate, result.RedirectDelayMs, result.TopPick, result.SimilarResults));
+        }
+    )
+    .AllowAnonymous()
+    .WithName("HerafiChat");
 
 app.MapGet(
         "/api/auth/public-config",
@@ -186,17 +206,29 @@ app.MapPost(
             if (PasswordInputRules.ContainsArabicScript(req.Password))
                 return Results.BadRequest(new { error = PasswordInputRules.ArabicNotAllowedMessage });
 
+            var email = req.Email.Trim().ToLowerInvariant();
+            if (string.IsNullOrEmpty(email))
+                return Results.BadRequest(new { error = "Email is required." });
+
+            if (await users.FindByEmailAsync(email) is not null)
+                return Results.Conflict(new { error = "An account with this email already exists. Please log in instead." });
+
             var user = new ApplicationUser
             {
-                UserName = req.Email.Trim(),
-                Email = req.Email.Trim(),
+                UserName = email,
+                Email = email,
                 FullName = req.FullName.Trim(),
                 Phone = string.IsNullOrWhiteSpace(req.Phone) ? null : req.Phone.Trim(),
             };
 
             var create = await users.CreateAsync(user, req.Password);
             if (!create.Succeeded)
+            {
+                if (create.Errors.Any(e => e.Code is "DuplicateEmail" or "DuplicateUserName"))
+                    return Results.Conflict(new { error = "An account with this email already exists. Please log in instead." });
+
                 return Results.BadRequest(new { errors = create.Errors.Select(e => e.Description).ToArray() });
+            }
 
             await users.AddToRoleAsync(user, roleName);
 
@@ -244,7 +276,7 @@ app.MapPost(
             if (PasswordInputRules.ContainsArabicScript(req.Password))
                 return Results.BadRequest(new { error = PasswordInputRules.ArabicNotAllowedMessage });
 
-            var user = await users.FindByEmailAsync(req.Email.Trim());
+            var user = await users.FindByEmailAsync(req.Email.Trim().ToLowerInvariant());
             if (user is null || !await users.CheckPasswordAsync(user, req.Password))
                 return Results.Unauthorized();
 
@@ -724,7 +756,12 @@ app.MapGet(
 
 app.MapPut(
         "/api/me/provider-profile",
-        async (ProviderProfileSaveDto req, ClaimsPrincipal principal, AppDbContext db) =>
+        async (
+            ProviderProfileSaveDto req,
+            ClaimsPrincipal principal,
+            AppDbContext db,
+            IHubContext<BrowseHub> browseHub
+        ) =>
         {
             var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -773,9 +810,21 @@ app.MapPut(
             p.PriceAmount = req.PriceAmount is < 0 ? null : req.PriceAmount;
             p.PriceUnit = req.PriceUnit is "hour" or "day" or "week" ? req.PriceUnit : "hour";
             p.ExperienceYears = req.ExperienceYears is < 0 or > 80 ? null : req.ExperienceYears;
+            var prevVisible = p.VisibleInSearch;
             p.VisibleInSearch = req.VisibleInSearch;
 
             await db.SaveChangesAsync();
+
+            if (prevVisible != p.VisibleInSearch)
+            {
+                await browseHub.Clients
+                    .Group(BrowseHub.FeedGroup)
+                    .SendAsync(
+                        "ProviderVisibilityChanged",
+                        new { providerId = p.Id, searchable = p.VisibleInSearch }
+                    );
+            }
+
             var avgs = await LoadRatingAverages(db);
             return Results.Ok(ProviderMapper.ToDetail(p, avgs.GetValueOrDefault(p.Id)));
         }
@@ -1135,11 +1184,20 @@ app.MapPost(
 
 app.MapPost(
         "/api/me/service-requests",
-        async (CreateServiceRequestDto req, ClaimsPrincipal principal, AppDbContext db, IHubContext<ChatHub> hubContext) =>
+        async (CreateServiceRequestDto req, ClaimsPrincipal principal, UserManager<ApplicationUser> users, AppDbContext db, IHubContext<ChatHub> hubContext) =>
         {
             var me = principal.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(me))
                 return Results.Unauthorized();
+
+            var customer = await users.FindByIdAsync(me);
+            if (customer is null)
+                return Results.Unauthorized();
+            if (!await users.IsInRoleAsync(customer, "Customer"))
+                return Results.Json(
+                    new { error = "Only customer accounts can book services. Provider accounts can browse but not book." },
+                    statusCode: StatusCodes.Status403Forbidden
+                );
 
             var body = req.Body.Trim();
             if (string.IsNullOrWhiteSpace(body))
@@ -1181,6 +1239,18 @@ app.MapPost(
 
             await db.SaveChangesAsync();
 
+            var customerUser = await users.FindByIdAsync(me);
+            var bookingRequest = new ServiceRequestDto
+            {
+                Id = sr.Id.ToString(),
+                CustomerUserId = me,
+                CustomerName = customerUser?.FullName ?? customerUser?.Email ?? "Customer",
+                Body = sr.Body,
+                Status = sr.Status,
+                CreatedAt = sr.CreatedAt,
+                RespondedAt = sr.RespondedAt,
+            };
+
             var payload = new
             {
                 id = chatMsg.Id.ToString(),
@@ -1191,6 +1261,7 @@ app.MapPost(
             };
             try
             {
+                await hubContext.Clients.User(prof.UserId).SendAsync("NewBookingRequest", bookingRequest);
                 await hubContext.Clients.Users(me, prof.UserId).SendAsync("ReceiveMessage", payload);
             }
             catch (Exception)
@@ -1251,12 +1322,9 @@ app.MapGet(
             if (string.IsNullOrEmpty(me))
                 return Results.Unauthorized();
 
-            var profile = await db.ProviderProfiles.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == me);
-            if (profile is null)
-                return Results.Ok(Array.Empty<ServiceRequestDto>());
-
+            // Tie history to the provider account (UserId), not only the current profile row id.
             var rows = (await db.ServiceRequests.AsNoTracking()
-                    .Where(r => r.ProviderProfileId == profile.Id)
+                    .Where(r => r.ProviderUserId == me)
                     .ToListAsync())
                 .OrderByDescending(r => r.CreatedAt)
                 .ToList();
@@ -1291,6 +1359,7 @@ app.MapPatch(
             Guid id,
             ServiceRequestStatusDto req,
             ClaimsPrincipal principal,
+            UserManager<ApplicationUser> users,
             AppDbContext db,
             IHubContext<ChatHub> hubContext
         ) =>
@@ -1299,13 +1368,11 @@ app.MapPatch(
             if (string.IsNullOrEmpty(me))
                 return Results.Unauthorized();
 
-            var profile = await db.ProviderProfiles.FirstOrDefaultAsync(p => p.UserId == me);
-            if (profile is null)
-                return Results.NotFound();
-
-            var sr = await db.ServiceRequests.FirstOrDefaultAsync(r => r.Id == id && r.ProviderProfileId == profile.Id);
+            var sr = await db.ServiceRequests.FirstOrDefaultAsync(r => r.Id == id && r.ProviderUserId == me);
             if (sr is null)
                 return Results.NotFound();
+
+            var profile = await db.ProviderProfiles.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == me);
 
             if (!string.Equals(sr.Status, "pending", StringComparison.OrdinalIgnoreCase))
                 return Results.BadRequest(new { error = "This request is no longer pending." });
@@ -1319,13 +1386,14 @@ app.MapPatch(
 
             await db.SaveChangesAsync();
 
+            var providerDisplayName = profile?.DisplayName ?? "Provider";
             var bookingPayload = new
             {
                 id = sr.Id.ToString(),
                 status = sr.Status,
-                providerDisplayName = profile.DisplayName ?? "Provider",
-                providerProfileId = profile.Id,
-                providerUserId = profile.UserId ?? "",
+                providerDisplayName,
+                providerProfileId = sr.ProviderProfileId,
+                providerUserId = sr.ProviderUserId,
                 body = sr.Body,
                 createdAt = sr.CreatedAt,
                 respondedAt = sr.RespondedAt,
@@ -1339,7 +1407,19 @@ app.MapPatch(
                 // Status is already persisted; real-time notify is best-effort.
             }
 
-            return Results.Ok(new { status = sr.Status });
+            var customer = await users.FindByIdAsync(sr.CustomerUserId);
+            return Results.Ok(
+                new ServiceRequestDto
+                {
+                    Id = sr.Id.ToString(),
+                    CustomerUserId = sr.CustomerUserId,
+                    CustomerName = customer?.FullName ?? customer?.Email ?? "Customer",
+                    Body = sr.Body,
+                    Status = sr.Status,
+                    CreatedAt = sr.CreatedAt,
+                    RespondedAt = sr.RespondedAt,
+                }
+            );
         }
     )
     .RequireAuthorization(policy => policy.RequireRole("Provider"))
